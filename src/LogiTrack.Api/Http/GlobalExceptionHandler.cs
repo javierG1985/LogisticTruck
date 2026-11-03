@@ -22,6 +22,7 @@ public sealed partial class GlobalExceptionHandler(
             ConflictException conflict => CreateProblem(StatusCodes.Status409Conflict, "Conflicto", conflict.Message),
             DomainException domain => CreateProblem(StatusCodes.Status409Conflict, "Regla de negocio incumplida", domain.Message),
             PreconditionFailedException precondition => CreateProblem(StatusCodes.Status412PreconditionFailed, "Precondición fallida", precondition.Message),
+            PreconditionRequiredException required => CreateProblem(StatusCodes.Status428PreconditionRequired, "Precondición requerida", required.Message),
             DbUpdateConcurrencyException => CreateProblem(
                 StatusCodes.Status412PreconditionFailed,
                 "Precondición fallida",

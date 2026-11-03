@@ -1,6 +1,7 @@
 using LogiTrack.Api;
 using LogiTrack.Application;
 using LogiTrack.Infrastructure;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
@@ -45,7 +46,7 @@ try
 
     app.Run();
 }
-catch (Exception exception)
+catch (Exception exception) when (exception is not HostAbortedException)
 {
     Log.Fatal(exception, "La aplicación terminó de forma inesperada");
 }

@@ -2,6 +2,7 @@ using FluentValidation;
 using LogiTrack.Application.Common.Behaviors;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace LogiTrack.Application;
 
@@ -18,6 +19,9 @@ public static class DependencyInjection
         });
 
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+
+        // El reloj se inyecta para que las pruebas controlen las fechas de creación y modificación.
+        services.TryAddSingleton(TimeProvider.System);
 
         return services;
     }
