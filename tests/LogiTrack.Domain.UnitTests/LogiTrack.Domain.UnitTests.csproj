@@ -15,4 +15,8 @@
     <ProjectReference Include="..\..\src\LogiTrack.Domain\LogiTrack.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
 </Project>

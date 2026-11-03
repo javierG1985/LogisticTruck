@@ -9,6 +9,20 @@
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.3.1" />
   </ItemGroup>
 
+  <ItemGroup Label="Aplicación (CQRS, validación) y dominio">
+    <PackageVersion Include="Mediator.Abstractions" Version="3.0.2" />
+    <PackageVersion Include="Mediator.SourceGenerator" Version="3.0.2" />
+    <PackageVersion Include="FluentValidation" Version="12.2.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Logging (Serilog y abstracciones)">
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
+    <PackageVersion Include="Serilog.Formatting.Compact" Version="3.0.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
+  </ItemGroup>
+
   <ItemGroup Label="Persistencia (EF Core + PostgreSQL + PostGIS)">
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.14" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14" />
@@ -22,6 +36,10 @@
   <ItemGroup Label="Abstracciones de Microsoft.Extensions (AddX con IServiceCollection)">
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup Label="Pruebas de arquitectura">
+    <PackageVersion Include="NetArchTest.Rules" Version="1.3.2" />
   </ItemGroup>
 
   <ItemGroup Label="Pruebas">

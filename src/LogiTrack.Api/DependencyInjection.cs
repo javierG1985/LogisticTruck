@@ -1,3 +1,4 @@
+using LogiTrack.Api.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LogiTrack.Api;
@@ -9,6 +10,8 @@ public static class DependencyInjection
         services.AddControllers();
         services.AddOpenApi();
         services.AddHealthChecks();
+        services.AddProblemDetails();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
 
         return services;
     }

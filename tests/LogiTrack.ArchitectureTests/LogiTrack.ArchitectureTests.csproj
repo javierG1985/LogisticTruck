@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="xunit.v3" />
+    <PackageReference Include="NetArchTest.Rules" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +17,10 @@
     <ProjectReference Include="..\..\src\LogiTrack.Application\LogiTrack.Application.csproj" />
     <ProjectReference Include="..\..\src\LogiTrack.Infrastructure\LogiTrack.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\LogiTrack.Api\LogiTrack.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
   </ItemGroup>
 
 </Project>
