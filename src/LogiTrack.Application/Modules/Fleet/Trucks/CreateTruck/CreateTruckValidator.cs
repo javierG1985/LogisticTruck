@@ -9,6 +9,7 @@ public sealed class CreateTruckValidator : AbstractValidator<CreateTruckCommand>
     public CreateTruckValidator()
     {
         RuleFor(command => command.Plate)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("La placa es obligatoria.")
             .Must(plate => Plate.TryCreate(plate, out _))

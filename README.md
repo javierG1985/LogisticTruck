@@ -20,7 +20,7 @@ dotnet --version
 docker compose up -d
 ```
 
-Crea un contenedor `logitrack-postgres` (imagen `postgis/postgis:18-3.6`) con la base `logitrack` y el usuario `logitrack`. Las credenciales son solo de desarrollo local.
+Crea un contenedor `logitrack-postgres` (imagen `postgis/postgis:18-3.6`) en el puerto 5433 del host, con la base `logitrack` y el usuario `logitrack`. Las credenciales son solo de desarrollo local. Si el puerto 5433 también está ocupado, cambia el mapeo en `docker-compose.yml` y `ConnectionStrings:LogiTrack`.
 
 ## Migraciones
 

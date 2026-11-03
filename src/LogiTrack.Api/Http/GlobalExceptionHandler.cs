@@ -71,8 +71,19 @@ public sealed partial class GlobalExceptionHandler(
             Status = status,
             Title = title,
             Detail = detail,
-            Type = $"https://datatracker.ietf.org/doc/html/rfc9110#section-15.{status / 100}.{status % 100}",
+            Type = TypeFor(status),
         };
+
+    // Enlace a la sección de la especificación que define cada código.
+    private static string TypeFor(int status) => status switch
+    {
+        StatusCodes.Status400BadRequest => "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.1",
+        StatusCodes.Status404NotFound => "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.5",
+        StatusCodes.Status409Conflict => "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.10",
+        StatusCodes.Status412PreconditionFailed => "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.13",
+        StatusCodes.Status428PreconditionRequired => "https://datatracker.ietf.org/doc/html/rfc6585#section-3",
+        _ => "https://datatracker.ietf.org/doc/html/rfc9110#section-15.6.1",
+    };
 
     private static string ToCamelCase(string name) =>
         string.IsNullOrEmpty(name) ? name : char.ToLowerInvariant(name[0]) + name[1..];

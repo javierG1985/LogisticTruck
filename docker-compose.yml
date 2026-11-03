@@ -7,7 +7,8 @@ services:
       POSTGRES_USER: logitrack
       POSTGRES_PASSWORD: logitrack_dev
     ports:
-      - "5432:5432"
+      # 5433 en el host: 5432 puede estar ocupado por una instalación local de PostgreSQL.
+      - "5433:5432"
     volumes:
       # PostgreSQL 18 guarda los datos bajo /var/lib/postgresql/18/docker: el volumen va en la raíz.
       - logitrack-pgdata:/var/lib/postgresql

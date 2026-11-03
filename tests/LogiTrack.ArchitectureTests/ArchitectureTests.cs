@@ -126,6 +126,24 @@ public sealed class ArchitectureTests
         }
     }
 
+    [Fact]
+    public void DomainEntities_WithPublicSetters_AreForbidden()
+    {
+        var entities = DomainAssembly.GetTypes()
+            .Where(type => type.IsSubclassOf(typeof(LogiTrack.Domain.SharedKernel.Entity)));
+
+        foreach (var entity in entities)
+        {
+            var publicSetters = entity
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(property => property.SetMethod is { IsPublic: true })
+                .Select(property => property.Name)
+                .ToList();
+
+            Assert.True(publicSetters.Count == 0, $"{entity.Name} tiene setters públicos: {string.Join(", ", publicSetters)}");
+        }
+    }
+
     private static IEnumerable<Type> Unwrap(Type type)
     {
         yield return type;
