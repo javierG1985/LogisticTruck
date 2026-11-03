@@ -55,4 +55,4 @@ En Development:
 - Documento OpenAPI: `/openapi/v1.json`
 - Salud: `/health` (devuelve `Healthy` cuando PostgreSQL responde)
 
-La documentación del diseño (ADR y glosario) y las convenciones para desarrollo (`CLAUDE.md`) se añaden en el Paso 7.
+La documentación del diseño está en [`docs/`](docs/) (ADR y glosario) y las convenciones para desarrollo en [`CLAUDE.md`](CLAUDE.md).
