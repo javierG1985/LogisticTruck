@@ -1,0 +1,11 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Las versiones de los paquetes se agregan aquí en cada paso, con su versión estable para net10.0. -->
+  </ItemGroup>
+
+</Project>
