@@ -15,6 +15,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("ConnectionStrings:LogiTrack", _database.GetConnectionString());
+        builder.ConfigureServices(services =>
+            services.AddScoped<Mediator.INotificationHandler<LogiTrack.Domain.Modules.Fleet.Trucks.Events.TruckStatusChanged>, TruckStatusChangedSpy>());
     }
 
     public async ValueTask InitializeAsync()
