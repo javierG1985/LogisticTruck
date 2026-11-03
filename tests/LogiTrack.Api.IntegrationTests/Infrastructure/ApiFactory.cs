@@ -10,11 +10,7 @@ namespace LogiTrack.Api.IntegrationTests.Infrastructure;
 // Levanta la API contra un PostgreSQL con PostGIS real (Testcontainers) y aplica las migraciones al arrancar.
 public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _database = new PostgreSqlBuilder("postgis/postgis:18-3.6")
-        .WithDatabase("logitrack")
-        .WithUsername("logitrack")
-        .WithPassword("logitrack_test")
-        .Build();
+    private readonly PostgreSqlContainer _database = new PostgreSqlBuilder("postgis/postgis:18-3.6").Build();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
