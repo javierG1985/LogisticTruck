@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LogiTrack.Application\LogiTrack.Application.csproj" />
+    <ProjectReference Include="..\LogiTrack.Infrastructure\LogiTrack.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

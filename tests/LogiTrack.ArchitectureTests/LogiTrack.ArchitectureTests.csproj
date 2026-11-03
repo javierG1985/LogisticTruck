@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <OutputType>Exe</OutputType>
+    <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\LogiTrack.Domain\LogiTrack.Domain.csproj" />
+    <ProjectReference Include="..\..\src\LogiTrack.Application\LogiTrack.Application.csproj" />
+    <ProjectReference Include="..\..\src\LogiTrack.Infrastructure\LogiTrack.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\LogiTrack.Api\LogiTrack.Api.csproj" />
+  </ItemGroup>
+
+</Project>

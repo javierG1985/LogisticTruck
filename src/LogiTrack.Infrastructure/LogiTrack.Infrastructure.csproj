@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LogiTrack.Application\LogiTrack.Application.csproj" />
+    <ProjectReference Include="..\LogiTrack.Domain\LogiTrack.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
