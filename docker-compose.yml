@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgis/postgis:18-3.6
+    container_name: logitrack-postgres
+    environment:
+      POSTGRES_DB: logitrack
+      POSTGRES_USER: logitrack
+      POSTGRES_PASSWORD: logitrack_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      # PostgreSQL 18 guarda los datos bajo /var/lib/postgresql/18/docker: el volumen va en la raíz.
+      - logitrack-pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U logitrack -d logitrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  logitrack-pgdata:
