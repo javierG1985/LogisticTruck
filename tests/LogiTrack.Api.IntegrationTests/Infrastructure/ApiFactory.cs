@@ -16,7 +16,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         builder.UseSetting("ConnectionStrings:LogiTrack", _database.GetConnectionString());
         builder.ConfigureServices(services =>
-            services.AddScoped<Mediator.INotificationHandler<LogiTrack.Domain.Modules.Fleet.Trucks.Events.TruckStatusChanged>, TruckStatusChangedSpy>());
+            services.AddScoped<Mediator.INotificationHandler<LogiTrack.Domain.Aggregates.Trucks.Events.TruckStatusChanged>, TruckStatusChangedSpy>());
     }
 
     public async ValueTask InitializeAsync()

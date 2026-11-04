@@ -1,6 +1,6 @@
 # CLAUDE.md · LogiTrack Backend
 
-Monolito modular (.NET 10, C# 14, ASP.NET Core con controladores, EF Core 10, PostgreSQL 18 + PostGIS). Léelo antes de cambiar código.
+Monolito (.NET 10, C# 14, ASP.NET Core con controladores, EF Core 10, PostgreSQL 18 + PostGIS). Léelo antes de cambiar código.
 
 ## Capas
 
@@ -9,52 +9,61 @@ Monolito modular (.NET 10, C# 14, ASP.NET Core con controladores, EF Core 10, Po
 | `LogiTrack.Domain` | Agregados, value objects, eventos de dominio y reglas | Ninguna | Solo `Mediator.Abstractions` (para `INotification`) |
 | `LogiTrack.Application` | Casos de uso: comandos, consultas, validadores, handlers | `Domain` | `Mediator.Abstractions`, `Mediator.SourceGenerator`, FluentValidation, `Microsoft.EntityFrameworkCore` (solo `DbSet` y LINQ). **Nunca Npgsql.** |
 | `LogiTrack.Infrastructure` | `AppDbContext`, configuraciones EF, migraciones, interceptores | `Application`, `Domain` | EF Core, Npgsql, NetTopologySuite, NamingConventions, HealthChecks.NpgSql |
-| `LogiTrack.Api` | Controladores, ProblemDetails, ETag, OpenAPI, `Program.cs` | `Application`, `Infrastructure` | ASP.NET Core, Serilog, Swagger UI, EF Core Design (solo desarrollo) |
+| `LogiTrack.Api` | Controladores, cuerpos HTTP, ProblemDetails, ETag, OpenAPI, `Program.cs` | `Application`, `Infrastructure` | ASP.NET Core, Serilog, Swagger UI, EF Core Design (solo desarrollo) |
 
 Si una referencia no está en esta tabla, no se agrega.
 
-## Módulos
+## Estructura por capa
 
-Un módulo es una parte del negocio con su lenguaje, su modelo y su esquema de PostgreSQL: `Fleet` (esquema `fleet`), y más adelante `Customers`, `Shipping`, `Documents`, `Billing`. Cada módulo tiene `Modules/<Modulo>/` en `Domain`, `Application` y `Api`, y sus configuraciones en `Infrastructure/Persistence/Configurations/<Modulo>/`.
+Una misma palabra identifica una parte del negocio en todas las capas. Para camiones es `Trucks`.
 
-Un módulo nunca usa el dominio ni los slices de otro. Se comunican con eventos de dominio y, en fases posteriores, con eventos de integración.
+| Capa | Carpeta | Qué contiene |
+| --- | --- | --- |
+| `Domain` | `Aggregates/Trucks/` | Agregado `Truck`, value object `Plate`, `TruckStatus` y `Events/` |
+| `Application` | `Features/Trucks/` | `Commands/`, `Queries/` y `EventHandlers/`, una carpeta por caso de uso |
+| `Infrastructure` | `Persistence/Configurations/` | `TruckConfiguration.cs` (un archivo de mapeo por entidad) |
+| `Api` | `Controllers/Trucks/` | `TrucksController.cs` y `Requests/` con los cuerpos HTTP |
+
+Los esquemas de PostgreSQL siguen el área de negocio: `Trucks` va en `fleet`; más adelante `Shipments` en `shipping` y `Invoices` en `billing`. Hay un solo `AppDbContext`.
 
 ## Reglas de diseño
 
-1. **Reglas de negocio solo en `Domain`**, en `Modules/<Modulo>/<Agregado>/`. Los agregados heredan de `AggregateRoot`, no tienen setters públicos y se cambian con métodos con intención (`ChangeStatus`, `Delete`). Las reglas violadas lanzan `DomainException` (409).
-2. **Un slice = un caso de uso** en `Application/Modules/<Modulo>/<Recurso>/<CasoDeUso>/`: comando o consulta, validador (si hay entrada) y handler. La respuesta compartida por varios slices del mismo recurso vive en la carpeta del recurso.
-3. **Validación ≠ regla de negocio.** FluentValidation revisa la forma (obligatorio, longitud, formato). El agregado protege las invariantes. Si la regla vive en `Plate`, el validador la consulta (`Plate.TryCreate`), no la repite.
-4. **Handlers `sealed`** contra `IApplicationDbContext`. Sin Repository genérico ni Unit of Work.
-5. **Consultas**: `AsNoTracking()`, proyección y paginación siempre.
-6. **Ningún módulo usa a otro.** Comunicación por eventos.
-7. **DDD proporcional.** Agregados y eventos solo donde hay reglas reales. Si se duda, se pregunta antes de agregar ceremonia.
-8. **Lenguaje ubicuo.** Los nombres vienen de `docs/glossary.md`. Un término nuevo se registra antes de usarlo.
-9. **Controladores delgados**: `sealed`, solo `ISender` en el constructor, `ActionResult<T>`, rutas por atributo y `[ProducesResponseType]` en cada acción.
-10. **Errores en ProblemDetails (RFC 9457)** mediante `GlobalExceptionHandler`. Nunca se devuelve el stack trace.
-11. **`CancellationToken`** en acciones, handlers y llamadas a la base de datos.
-12. **Un esquema de PostgreSQL por módulo.** Un solo `AppDbContext`, configuraciones separadas por módulo.
-13. **Eventos de dominio después de guardar.** `DispatchDomainEventsInterceptor` los publica tras un `SaveChanges` exitoso.
+1. **Reglas de negocio solo en `Domain/Aggregates/<Agregado>/`.** Los agregados heredan de `AggregateRoot`, tienen setters privados y se cambian con métodos con intención (`ChangeStatus`, `Delete`). Las reglas violadas lanzan `DomainException` (409).
+2. **CQRS en cada feature:** `Commands/<CasoDeUso>/` implementa `ICommand` o `ICommand<T>`; `Queries/<CasoDeUso>/` implementa `IQuery<T>`. `EventHandlers/` reacciona a domain events.
+3. **Un caso de uso = una carpeta** con su comando o consulta, su validador (si hay entrada) y su handler. La respuesta compartida por varios casos de uso de la feature vive en la raíz de la feature (`Features/Trucks/TruckDetailsResponse.cs`). No se comparten DTOs entre features.
+4. **Validación ≠ regla de negocio.** FluentValidation revisa la forma (obligatorio, longitud, formato). El agregado protege las invariantes. Si la regla vive en `Plate`, el validador la consulta (`Plate.TryCreate`), no la repite.
+5. **Handlers `sealed`** contra `IApplicationDbContext`. Sin Repository genérico ni Unit of Work.
+6. **Consultas:** `AsNoTracking()`, proyección con `Select` y paginación siempre.
+7. **Una feature no usa las clases de otra.** Se comunican con domain events y, en fases posteriores, con eventos de integración.
+8. **DDD proporcional.** Agregados y eventos solo donde hay reglas reales. Si se duda, se pregunta antes de agregar ceremonia.
+9. **Lenguaje ubicuo.** Los nombres vienen de `docs/glossary.md`. Un término nuevo se registra antes de usarlo.
+10. **Controladores delgados:** `sealed`, solo `ISender` en el constructor, `ActionResult<T>`, rutas por atributo y `[ProducesResponseType]` en cada acción.
+11. **Errores en ProblemDetails (RFC 9457)** mediante `GlobalExceptionHandler`. Nunca se devuelve el stack trace.
+12. **`CancellationToken`** en acciones, handlers y llamadas a la base de datos.
+13. **Eventos de dominio después de guardar.** `DispatchDomainEventsInterceptor` los publica tras un `SaveChanges` exitoso y luego los limpia del agregado.
 
 ## Convenciones de nombres
 
 | Elemento | Convención | Ejemplo |
 | --- | --- | --- |
-| Proyectos | `LogiTrack.<Capa>`, y `LogiTrack.<Capa>.UnitTests` / `.IntegrationTests` | `LogiTrack.Domain`, `LogiTrack.Api.IntegrationTests` |
-| Namespaces | Igual a la carpeta, con ámbito de archivo | `LogiTrack.Application.Modules.Fleet.Trucks.CreateTruck` |
-| Carpeta de recurso | Plural | `Modules/Fleet/Trucks/` |
+| Solución | `LogiTrack.slnx` | `LogiTrack.slnx` |
+| Proyectos | `LogiTrack.<Capa>`, y `.UnitTests` / `.IntegrationTests` | `LogiTrack.Domain`, `LogiTrack.Api.IntegrationTests` |
+| Namespaces | Igual a la carpeta, con ámbito de archivo | `LogiTrack.Application.Features.Trucks.Commands.CreateTruck` |
+| Carpeta de agregado / feature / controladores | Plural, PascalCase, mismo nombre en todas las capas | `Aggregates/Trucks/`, `Features/Trucks/`, `Controllers/Trucks/` |
 | Agregados y value objects | Singular | `Truck`, `Plate` |
-| Slices | Verbo + sustantivo: `List` para colecciones, `Get` para uno | `CreateTruck`, `ListTrucks`, `GetTruckById` |
-| Tipos del slice | Nombre del slice + rol | `CreateTruckCommand`, `CreateTruckValidator`, `CreateTruckHandler` |
-| Respuestas | `<Recurso>DetailsResponse` o `<Recurso>ListItem` | `TruckDetailsResponse`, `TruckListItem` |
-| Cuerpos HTTP | `<CasoDeUso>Request`, solo si no coincide con el comando | `UpdateTruckRequest` |
+| Casos de uso | Verbo + sustantivo: `List` para colecciones, `Get` para uno | `CreateTruck`, `ListTrucks`, `GetTruckById` |
+| Tipos del caso de uso | Nombre del caso de uso + rol | `CreateTruckCommand`, `ListTrucksQuery`, `CreateTruckValidator`, `CreateTruckHandler` |
+| Respuestas | `<Recurso>DetailsResponse` o `<Recurso>ListItem` | `TruckDetailsResponse`, `TruckListItem`, `PagedResult<T>` |
+| Cuerpos HTTP | `<CasoDeUso>Request`, en `Api/Controllers/<Feature>/Requests/`, solo si no coincide con el comando | `UpdateTruckRequest` |
 | Controladores | Recurso en plural + `Controller` | `TrucksController`, `[Route("api/trucks")]` |
 | Acciones | Verbo del caso de uso, sin `Async` | `List`, `GetById`, `Create`, `Update`, `ChangeStatus`, `Delete` |
 | Domain events | Hecho en pasado | `TruckRegistered`, `TruckStatusChanged` |
 | Handlers de eventos | Qué hace + `On` + evento | `LogOnTruckStatusChanged` |
-| Registro de servicios | `Add<Capa>()` en `DependencyInjection.cs` | `AddApplication()`, `AddInfrastructure(config)` |
-| Tablas | snake_case, plural, esquema por módulo | `fleet.trucks.capacity_kg` |
+| Configuraciones EF | Entidad + `Configuration` | `TruckConfiguration` |
+| Registro de servicios | `Add<Capa>()` en `DependencyInjection.cs` | `AddApplication()`, `AddInfrastructure(config)`, `AddPresentation()` |
+| Tablas | snake_case, plural, esquema por área | `fleet.trucks.capacity_kg` |
 | Código | Inglés. Mensajes al usuario en español. | `"La placa es obligatoria."` |
-| Commits | Conventional Commits | `feat(fleet): crear camión` |
+| Commits | Conventional Commits | `feat(trucks): crear camión` |
 
 ## Convenciones REST
 
@@ -77,16 +86,16 @@ Un módulo nunca usa el dominio ni los slices de otro. Se comunican con eventos 
 
 ### Cómo agregar un caso de uso
 
-1. `Application/Modules/<Modulo>/<Recurso>/<CasoDeUso>/`: crea el `Command` o `Query`, el `Validator` y el `Handler`.
-2. Si la respuesta es nueva, `Application/Modules/<Modulo>/<Recurso>/<Respuesta>.cs`.
-3. Si cambia el dominio, la regla va en el agregado (`Domain/Modules/<Modulo>/<Agregado>/`) con su prueba en `LogiTrack.Domain.UnitTests`.
-4. Si es un endpoint, un método en el controlador de `Api/Controllers/<Modulo>/<Recurso>/` (los cuerpos HTTP que no coinciden con el comando van en `Api/Requests/<Modulo>/<Recurso>/`) con su `[ProducesResponseType]`.
-5. Prueba de integración en `LogiTrack.Api.IntegrationTests`.
+1. `Application/Features/<Feature>/Commands/<CasoDeUso>/` (o `Queries/`): comando o consulta, validador y handler.
+2. Si la respuesta es nueva y la usan varios casos de uso, `Application/Features/<Feature>/<Respuesta>.cs`.
+3. Si cambia el dominio, la regla va en el agregado (`Domain/Aggregates/<Agregado>/`) con su prueba en `LogiTrack.Domain.UnitTests`.
+4. Si es un endpoint, un método en `Api/Controllers/<Feature>/<Recurso>Controller.cs`. Los cuerpos HTTP que no coinciden con el comando van en `Api/Controllers/<Feature>/Requests/`.
+5. Prueba de integración en `LogiTrack.Api.IntegrationTests/Controllers/<Feature>/`.
 
-### Cómo agregar un agregado a un módulo
+### Cómo agregar un agregado nuevo
 
-1. `Domain/Modules/<Modulo>/<Agregado>/`: la clase (heredando de `AggregateRoot`), sus value objects y sus eventos en `Events/`.
-2. `Infrastructure/Persistence/Configurations/<Modulo>/<Agregado>Configuration.cs`: tabla con esquema, conversiones y query filter.
+1. `Domain/Aggregates/<Agregado>/`: la clase (heredando de `AggregateRoot`), sus value objects y sus eventos en `Events/`.
+2. `Infrastructure/Persistence/Configurations/<Agregado>Configuration.cs`: tabla con su esquema, conversiones y query filter.
 3. `IApplicationDbContext` y `AppDbContext`: añade el `DbSet<T>`.
 4. `dotnet ef migrations add <Nombre>` y revisa el SQL.
 
@@ -109,8 +118,8 @@ dotnet ef database update -p src/LogiTrack.Infrastructure -s src/LogiTrack.Api
 - No expongas agregados en controladores: solo comandos, consultas y respuestas.
 - No uses Npgsql en `Application`.
 - No agregues Repository genérico, AutoMapper, carpetas `Services/` o `Helpers/` genéricas.
-- No hagas referencias entre módulos ni entre slices de distintos módulos.
-- No compartas DTOs entre recursos.
+- No hagas referencias entre features ni entre agregados.
+- No compartas DTOs entre features.
 - No pongas credenciales de producción en el repositorio. `appsettings.Development.json` y `docker-compose.yml` solo tienen credenciales locales.
 - No edites migraciones ya aplicadas; crea una nueva.
 - No uses versiones preview de paquetes.

@@ -52,48 +52,75 @@ public sealed class ArchitectureTests
     }
 
     [Fact]
-    public void Modules_CrossReferencesInAnyLayer_AreForbidden()
+    public void Aggregates_CrossReferencesInAnyLayer_AreForbidden()
     {
-        var modules = Layers
-            .SelectMany(layer => layer.Assembly.GetTypes())
-            .Select(type => type.Namespace)
-            .OfType<string>()
-            .Where(ns => ns.Contains(".Modules.", StringComparison.Ordinal))
-            .Select(ns => ns.Split(".Modules.")[1].Split('.')[0])
-            .Distinct()
+        AssertNoCrossReferences("Aggregates");
+    }
+
+    [Fact]
+    public void Features_CrossReferencesInAnyLayer_AreForbidden()
+    {
+        AssertNoCrossReferences("Features");
+    }
+
+    [Fact]
+    public void Commands_ImplementICommand_AreRequired()
+    {
+        var commands = ApplicationAssembly.GetTypes()
+            .Where(type => IsInFolder(type, "Commands") && type.Name.EndsWith("Command", StringComparison.Ordinal))
             .ToList();
 
-        foreach (var (layer, assembly) in Layers)
+        Assert.NotEmpty(commands);
+
+        foreach (var command in commands)
         {
-            foreach (var module in modules)
-            {
-                var otherModuleNamespaces = modules
-                    .Where(other => other != module)
-                    .SelectMany(other => Layers.Select(l => $"LogiTrack.{l.Layer}.Modules.{other}"))
-                    .ToArray();
+            var implementsCommand = command.GetInterfaces().Any(i =>
+                i == typeof(ICommand)
+                || (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommand<>)));
 
-                if (otherModuleNamespaces.Length == 0)
-                {
-                    continue;
-                }
-
-                var result = Types.InAssembly(assembly)
-                    .That().ResideInNamespaceStartingWith($"LogiTrack.{layer}.Modules.{module}")
-                    .ShouldNot().HaveDependencyOnAny(otherModuleNamespaces)
-                    .GetResult();
-
-                Assert.True(result.IsSuccessful, FailureMessage(result.FailingTypeNames));
-            }
+            Assert.True(implementsCommand, $"{command.FullName} está en Commands/ pero no implementa ICommand.");
         }
     }
 
     [Fact]
-    public void Controllers_WithOnlySenderAndOwnResource_AreAllowed()
+    public void Queries_ImplementIQuery_AreRequired()
+    {
+        var queries = ApplicationAssembly.GetTypes()
+            .Where(type => IsInFolder(type, "Queries") && type.Name.EndsWith("Query", StringComparison.Ordinal))
+            .ToList();
+
+        Assert.NotEmpty(queries);
+
+        foreach (var query in queries)
+        {
+            var implementsQuery = query.GetInterfaces().Any(i =>
+                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQuery<>));
+
+            Assert.True(implementsQuery, $"{query.FullName} está en Queries/ pero no implementa IQuery<T>.");
+        }
+    }
+
+    [Fact]
+    public void Queries_DoNotContainCommands_AndCommandsDoNotContainQueries()
+    {
+        var misplaced = ApplicationAssembly.GetTypes()
+            .Where(type => (IsInFolder(type, "Queries") && type.Name.EndsWith("Command", StringComparison.Ordinal))
+                || (IsInFolder(type, "Commands") && type.Name.EndsWith("Query", StringComparison.Ordinal)))
+            .Select(type => type.FullName)
+            .ToList();
+
+        Assert.Empty(misplaced);
+    }
+
+    [Fact]
+    public void Controllers_WithOnlySenderAndOwnFeature_AreAllowed()
     {
         var controllers = ApiAssembly.GetTypes()
             .Where(type => type.Name.EndsWith("Controller", StringComparison.Ordinal)
                 && type.Namespace?.StartsWith("LogiTrack.Api.Controllers.", StringComparison.Ordinal) == true)
             .ToList();
+
+        Assert.NotEmpty(controllers);
 
         foreach (var controller in controllers)
         {
@@ -101,8 +128,7 @@ public sealed class ArchitectureTests
             var allowedNamespaces = new[]
             {
                 $"LogiTrack.Api.Controllers.{resource}",
-                $"LogiTrack.Api.Requests.{resource}",
-                $"LogiTrack.Application.Modules.{resource}",
+                $"LogiTrack.Application.Features.{resource}",
                 "LogiTrack.Application.Common.Pagination",
             };
 
@@ -144,6 +170,45 @@ public sealed class ArchitectureTests
             Assert.True(publicSetters.Count == 0, $"{entity.Name} tiene setters públicos: {string.Join(", ", publicSetters)}");
         }
     }
+
+    // Un agregado o una feature no puede depender de otro del mismo tipo: se comunican con eventos.
+    private static void AssertNoCrossReferences(string marker)
+    {
+        var names = Layers
+            .SelectMany(layer => layer.Assembly.GetTypes())
+            .Select(type => type.Namespace)
+            .OfType<string>()
+            .Where(ns => ns.Contains($".{marker}.", StringComparison.Ordinal))
+            .Select(ns => ns.Split($".{marker}.")[1].Split('.')[0])
+            .Distinct()
+            .ToList();
+
+        foreach (var (layer, assembly) in Layers)
+        {
+            foreach (var name in names)
+            {
+                var otherNamespaces = names
+                    .Where(other => other != name)
+                    .SelectMany(other => Layers.Select(l => $"LogiTrack.{l.Layer}.{marker}.{other}"))
+                    .ToArray();
+
+                if (otherNamespaces.Length == 0)
+                {
+                    continue;
+                }
+
+                var result = Types.InAssembly(assembly)
+                    .That().ResideInNamespaceStartingWith($"LogiTrack.{layer}.{marker}.{name}")
+                    .ShouldNot().HaveDependencyOnAny(otherNamespaces)
+                    .GetResult();
+
+                Assert.True(result.IsSuccessful, FailureMessage(result.FailingTypeNames));
+            }
+        }
+    }
+
+    private static bool IsInFolder(Type type, string folder) =>
+        type.Namespace?.Contains($".{folder}.", StringComparison.Ordinal) == true;
 
     private static IEnumerable<Type> Unwrap(Type type)
     {

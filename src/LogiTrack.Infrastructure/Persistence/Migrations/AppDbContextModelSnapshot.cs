@@ -23,7 +23,7 @@ namespace LogiTrack.Infrastructure.Persistence.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("LogiTrack.Domain.Modules.Fleet.Trucks.Truck", b =>
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Trucks.Truck", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

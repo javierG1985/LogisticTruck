@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using LogiTrack.Domain.Modules.Fleet.Trucks.Events;
+using LogiTrack.Domain.Aggregates.Trucks.Events;
 using Mediator;
 
 namespace LogiTrack.Api.IntegrationTests.Infrastructure;

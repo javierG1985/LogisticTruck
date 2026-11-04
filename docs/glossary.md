@@ -2,11 +2,11 @@
 
 Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el código. Si un término no está aquí, se añade antes de usarlo.
 
-## Módulo Fleet (flota)
+## Área Fleet (flota)
 
 | Término de negocio | Nombre en el código | Notas |
 | --- | --- | --- |
-| Camión | `Truck` | Agregado raíz del módulo. Se identifica con un `Guid` UUID v7. |
+| Camión | `Truck` | Agregado raíz de la feature `Trucks`. Se identifica con un `Guid` UUID v7. |
 | Placa | `Plate` | Value object. Formato colombiano `ABC123`: tres letras y tres números. Se guarda en mayúsculas. |
 | SOAT | `SoatExpiresOn` | Fecha de vencimiento del seguro obligatorio (`DateOnly`). |
 | Revisión técnico-mecánica | `TechReviewExpiresOn` | Fecha de vencimiento de la revisión técnico-mecánica (`DateOnly`). |

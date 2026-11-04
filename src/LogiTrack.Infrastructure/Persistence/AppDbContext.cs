@@ -1,5 +1,5 @@
 using LogiTrack.Application.Common.Abstractions;
-using LogiTrack.Domain.Modules.Fleet.Trucks;
+using LogiTrack.Domain.Aggregates.Trucks;
 using Microsoft.EntityFrameworkCore;
 
 namespace LogiTrack.Infrastructure.Persistence;
