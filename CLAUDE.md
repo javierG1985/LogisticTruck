@@ -80,7 +80,7 @@ Un módulo nunca usa el dominio ni los slices de otro. Se comunican con eventos 
 1. `Application/Modules/<Modulo>/<Recurso>/<CasoDeUso>/`: crea el `Command` o `Query`, el `Validator` y el `Handler`.
 2. Si la respuesta es nueva, `Application/Modules/<Modulo>/<Recurso>/<Respuesta>.cs`.
 3. Si cambia el dominio, la regla va en el agregado (`Domain/Modules/<Modulo>/<Agregado>/`) con su prueba en `LogiTrack.Domain.UnitTests`.
-4. Si es un endpoint, un método en el controlador de `Api/Modules/<Modulo>/<Recurso>/` con su `[ProducesResponseType]`.
+4. Si es un endpoint, un método en el controlador de `Api/Controllers/<Modulo>/<Recurso>/` (los cuerpos HTTP que no coinciden con el comando van en `Api/Requests/<Modulo>/<Recurso>/`) con su `[ProducesResponseType]`.
 5. Prueba de integración en `LogiTrack.Api.IntegrationTests`.
 
 ### Cómo agregar un agregado a un módulo

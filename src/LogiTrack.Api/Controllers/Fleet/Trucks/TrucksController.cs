@@ -1,4 +1,5 @@
 using LogiTrack.Api.Http;
+using LogiTrack.Api.Requests.Fleet.Trucks;
 using LogiTrack.Application.Common.Pagination;
 using LogiTrack.Application.Modules.Fleet.Trucks;
 using LogiTrack.Application.Modules.Fleet.Trucks.ChangeTruckStatus;
@@ -10,7 +11,7 @@ using LogiTrack.Application.Modules.Fleet.Trucks.UpdateTruck;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LogiTrack.Api.Modules.Fleet.Trucks;
+namespace LogiTrack.Api.Controllers.Fleet.Trucks;
 
 [ApiController]
 [Route("api/trucks")]

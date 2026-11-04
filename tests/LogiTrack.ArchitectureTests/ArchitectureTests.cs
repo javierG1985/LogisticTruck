@@ -92,15 +92,16 @@ public sealed class ArchitectureTests
     {
         var controllers = ApiAssembly.GetTypes()
             .Where(type => type.Name.EndsWith("Controller", StringComparison.Ordinal)
-                && type.Namespace?.StartsWith("LogiTrack.Api.Modules.", StringComparison.Ordinal) == true)
+                && type.Namespace?.StartsWith("LogiTrack.Api.Controllers.", StringComparison.Ordinal) == true)
             .ToList();
 
         foreach (var controller in controllers)
         {
-            var resource = controller.Namespace![("LogiTrack.Api.Modules.").Length..];
+            var resource = controller.Namespace![("LogiTrack.Api.Controllers.").Length..];
             var allowedNamespaces = new[]
             {
-                $"LogiTrack.Api.Modules.{resource}",
+                $"LogiTrack.Api.Controllers.{resource}",
+                $"LogiTrack.Api.Requests.{resource}",
                 $"LogiTrack.Application.Modules.{resource}",
                 "LogiTrack.Application.Common.Pagination",
             };
