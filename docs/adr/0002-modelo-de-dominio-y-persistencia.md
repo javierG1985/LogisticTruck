@@ -5,7 +5,7 @@
 
 ## Contexto
 
-El dominio tiene agregados con invariantes (un camión dado de baja no se modifica; un camión en mantenimiento no pasa a ruta) y necesita persistencia en PostgreSQL con PostGIS. Hay que decidir cómo accede la aplicación a los datos, cómo se organizan las tablas entre módulos y cómo se publican los eventos de dominio.
+El dominio tiene agregados con invariantes (un camión dado de baja no se modifica; un camión en mantenimiento no pasa a ruta) y necesita persistencia en PostgreSQL con PostGIS. Hay que decidir cómo accede la aplicación a los datos, cómo se organizan las tablas entre áreas de negocio y cómo se publican los eventos de dominio.
 
 ## Decisiones
 
@@ -17,13 +17,13 @@ No hay Repository genérico ni Unit of Work. `DbContext` ya es una unidad de tra
 
 Las consultas (`Queries`) usan `DbSet` con `AsNoTracking()` y proyecciones; los comandos cargan el agregado, llaman a un método con intención y guardan.
 
-### 2. Un solo `AppDbContext` con un esquema de PostgreSQL por módulo
+### 2. Un solo `AppDbContext` con un esquema de PostgreSQL por área de negocio
 
-Todos los módulos comparten `AppDbContext`, pero cada uno es dueño de su esquema (`fleet`, `customers`, `shipping`…) y sus configuraciones EF viven en `Persistence/Configurations/<Modulo>/`.
+Todas las áreas comparten `AppDbContext`, pero cada una es dueña de su esquema (`fleet`, `customers`, `shipping`…). Las configuraciones EF viven en `Persistence/Configurations/`, un archivo por entidad.
 
-Un contexto por módulo impediría una transacción que toque dos agregados del monolito (por ejemplo, asignar un camión y un conductor). El aislamiento se consigue por esquema y por reglas de dependencia, no por separar contextos.
+Un contexto por área impediría una transacción que toque dos agregados del monolito (por ejemplo, asignar un camión y un conductor). El aislamiento se consigue por esquema y por reglas de dependencia, no por separar contextos.
 
-Ningún handler consulta tablas de otro módulo. Si lo necesita, debe recibir un evento de dominio.
+Ningún handler consulta tablas de otra feature. Si lo necesita, debe recibir un evento de dominio.
 
 ### 3. Los domain events implementan `INotification` de Mediator
 
@@ -49,6 +49,6 @@ El agregado tiene `Version` (`uint`) mapeada a la columna de sistema `xmin` de P
   - Los eventos de dominio se publican solo cuando los datos ya están guardados.
   - La concurrencia no depende de bloqueos: no hay que gestionar transacciones manuales.
 - Negativas:
-  - Un solo `AppDbContext` crece a medida que se añaden módulos. Se mitiga con configuraciones separadas por módulo.
+  - Un solo `AppDbContext` crece a medida que se añaden áreas de negocio. Se mitiga con una configuración por entidad, en archivos separados.
   - `Plate` es un value object convertido a texto. EF Core no traduce `Plate.Value` en SQL, así que las consultas proyectan la columna y convierten en memoria. Está comentado en `ListTrucksHandler`.
   - El interceptor publica dentro del mismo hilo tras guardar. Si un handler de evento falla, la excepción llega al llamador aunque los datos ya estén guardados. Por eso los handlers de eventos deben ser idempotentes y, cuando haga falta, delegar en colas (fase de RabbitMQ).
