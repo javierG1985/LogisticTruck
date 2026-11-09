@@ -5,8 +5,6 @@ namespace LogiTrack.Application.Features.Drivers.Queries.ListDrivers;
 
 public sealed class ListDriversValidator : AbstractValidator<ListDriversQuery>
 {
-    private static readonly string[] SortableFields = ["firstName", "lastName", "documentNumber", "status", "licenseExpiresOn", "createdAt"];
-
     public ListDriversValidator()
     {
         Include(new PagedRequestValidator<ListDriversQuery>());
@@ -21,12 +19,7 @@ public sealed class ListDriversValidator : AbstractValidator<ListDriversQuery>
             .WithMessage("La categoría de licencia no es válida.");
 
         RuleFor(query => query.Sort)
-            .Must(BeSortable)
-            .WithMessage("El orden solo admite firstName, lastName, documentNumber, status, licenseExpiresOn o createdAt, con '-' para descendente.");
+            .Must(DriverSorts.Map.Accepts)
+            .WithMessage($"El orden solo admite {string.Join(", ", DriverSorts.Map.FieldNames)}, con '-' para descendente.");
     }
-
-    private static bool BeSortable(string? sort) =>
-        sort is null
-        || sort.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .All(token => SortableFields.Contains(token.TrimStart('-')));
 }

@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using LogiTrack.Application.Common.Abstractions;
 using LogiTrack.Application.Common.Pagination;
 using LogiTrack.Application.Common.Search;
@@ -27,7 +26,7 @@ public sealed class ListTrucksHandler(IApplicationDbContext db) : IQueryHandler<
         var totalCount = await trucks.CountAsync(cancellationToken);
 
         // EF no traduce Plate.Value en SQL, así que se proyectan las columnas y la placa se convierte en memoria.
-        var rows = await ApplySort(trucks, query.Sort)
+        var rows = await TruckSorts.Map.Apply(trucks, query.Sort)
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
             .Select(truck => new
@@ -62,46 +61,5 @@ public sealed class ListTrucksHandler(IApplicationDbContext db) : IQueryHandler<
         }
 
         return trucks.Where(truck => EF.Functions.Like(TextSearch.ToLowerText(truck.Brand), brandPattern, TextSearch.EscapeCharacter));
-    }
-
-    private static IOrderedQueryable<Truck> ApplySort(IQueryable<Truck> trucks, string? sort)
-    {
-        IOrderedQueryable<Truck>? ordered = null;
-
-        foreach (var token in (sort ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            var descending = token.StartsWith('-');
-            var field = token.TrimStart('-');
-
-            ordered = field switch
-            {
-                "plate" => Order(trucks, ordered, truck => truck.Plate, descending),
-                "brand" => Order(trucks, ordered, truck => truck.Brand, descending),
-                "modelYear" => Order(trucks, ordered, truck => truck.ModelYear, descending),
-                "capacityKg" => Order(trucks, ordered, truck => truck.CapacityKg, descending),
-                "status" => Order(trucks, ordered, truck => truck.Status, descending),
-                "createdAt" => Order(trucks, ordered, truck => truck.CreatedAt, descending),
-                _ => ordered,
-            };
-        }
-
-        ordered ??= trucks.OrderBy(truck => truck.Plate);
-
-        // Desempate por Id para que la paginación sea estable entre páginas.
-        return ordered.ThenBy(truck => truck.Id);
-    }
-
-    private static IOrderedQueryable<Truck> Order<TKey>(
-        IQueryable<Truck> trucks,
-        IOrderedQueryable<Truck>? previous,
-        Expression<Func<Truck, TKey>> key,
-        bool descending)
-    {
-        if (previous is null)
-        {
-            return descending ? trucks.OrderByDescending(key) : trucks.OrderBy(key);
-        }
-
-        return descending ? previous.ThenByDescending(key) : previous.ThenBy(key);
     }
 }

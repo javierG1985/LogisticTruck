@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using LogiTrack.Application.Common.Abstractions;
 using LogiTrack.Application.Common.Pagination;
 using LogiTrack.Application.Common.Search;
@@ -37,7 +36,7 @@ public sealed class ListDriversHandler(IApplicationDbContext db) : IQueryHandler
         var totalCount = await drivers.CountAsync(cancellationToken);
 
         // EF no traduce DocumentNumber.Value en SQL, así que se proyectan las columnas y la cédula se convierte en memoria.
-        var rows = await ApplySort(drivers, query.Sort)
+        var rows = await DriverSorts.Map.Apply(drivers, query.Sort)
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
             .Select(driver => new
@@ -83,46 +82,5 @@ public sealed class ListDriversHandler(IApplicationDbContext db) : IQueryHandler
         return drivers.Where(driver =>
             EF.Functions.Like(TextSearch.ToLowerText(driver.FirstName), namePattern, TextSearch.EscapeCharacter)
             || EF.Functions.Like(TextSearch.ToLowerText(driver.LastName), namePattern, TextSearch.EscapeCharacter));
-    }
-
-    private static IOrderedQueryable<Driver> ApplySort(IQueryable<Driver> drivers, string? sort)
-    {
-        IOrderedQueryable<Driver>? ordered = null;
-
-        foreach (var token in (sort ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            var descending = token.StartsWith('-');
-            var field = token.TrimStart('-');
-
-            ordered = field switch
-            {
-                "firstName" => Order(drivers, ordered, driver => driver.FirstName, descending),
-                "lastName" => Order(drivers, ordered, driver => driver.LastName, descending),
-                "documentNumber" => Order(drivers, ordered, driver => driver.DocumentNumber, descending),
-                "status" => Order(drivers, ordered, driver => driver.Status, descending),
-                "licenseExpiresOn" => Order(drivers, ordered, driver => driver.License.ExpiresOn, descending),
-                "createdAt" => Order(drivers, ordered, driver => driver.CreatedAt, descending),
-                _ => ordered,
-            };
-        }
-
-        ordered ??= drivers.OrderBy(driver => driver.LastName).ThenBy(driver => driver.FirstName);
-
-        // Desempate por Id para que la paginación sea estable entre páginas.
-        return ordered.ThenBy(driver => driver.Id);
-    }
-
-    private static IOrderedQueryable<Driver> Order<TKey>(
-        IQueryable<Driver> drivers,
-        IOrderedQueryable<Driver>? previous,
-        Expression<Func<Driver, TKey>> key,
-        bool descending)
-    {
-        if (previous is null)
-        {
-            return descending ? drivers.OrderByDescending(key) : drivers.OrderBy(key);
-        }
-
-        return descending ? previous.ThenByDescending(key) : previous.ThenBy(key);
     }
 }
