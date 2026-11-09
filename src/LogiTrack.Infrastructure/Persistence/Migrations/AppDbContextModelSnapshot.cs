@@ -23,6 +23,91 @@ namespace LogiTrack.Infrastructure.Persistence.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Drivers.Driver", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("address");
+
+                    b.Property<DateOnly>("BirthDate")
+                        .HasColumnType("date")
+                        .HasColumnName("birth_date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("document_number");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("first_name");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("last_name");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone");
+
+                    b.Property<string>("ProfilePhotoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("profile_photo_url");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_drivers");
+
+                    b.HasIndex("DocumentNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ix_drivers_document_number");
+
+                    b.ToTable("drivers", "fleet");
+                });
+
             modelBuilder.Entity("LogiTrack.Domain.Aggregates.Trucks.Truck", b =>
                 {
                     b.Property<Guid>("Id")
@@ -100,6 +185,41 @@ namespace LogiTrack.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_trucks_volume_m3_positive", "volume_m3 > 0");
                         });
+                });
+
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Drivers.Driver", b =>
+                {
+                    b.OwnsOne("LogiTrack.Domain.Aggregates.Drivers.DriverLicense", "License", b1 =>
+                        {
+                            b1.Property<Guid>("DriverId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Category")
+                                .IsRequired()
+                                .HasMaxLength(2)
+                                .HasColumnType("character varying(2)")
+                                .HasColumnName("license_category");
+
+                            b1.Property<DateOnly>("ExpiresOn")
+                                .HasColumnType("date")
+                                .HasColumnName("license_expires_on");
+
+                            b1.Property<DateOnly>("IssuedOn")
+                                .HasColumnType("date")
+                                .HasColumnName("license_issued_on");
+
+                            b1.HasKey("DriverId");
+
+                            b1.ToTable("drivers", "fleet");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DriverId")
+                                .HasConstraintName("fk_drivers_drivers_id");
+                        });
+
+                    b.Navigation("License")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
