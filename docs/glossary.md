@@ -24,9 +24,31 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | Cambio de estado | `Truck.ChangeStatus(...)` | Registra `TruckStatusChanged` con el estado anterior y el nuevo. |
 | Versión | `Truck.Version` | Número de cambio del camión para concurrencia optimista (columna `xmin`). |
 
+## Área Fleet: conductores
+
+| Término de negocio | Nombre en el código | Notas |
+| --- | --- | --- |
+| Conductor | `Driver` | Agregado raíz de la feature `Drivers`. Se identifica con un `Guid` UUID v7. |
+| Cédula | `DocumentNumber` | Número de cédula del conductor. Solo dígitos, entre 6 y 10. Único en el sistema. |
+| Fecha de nacimiento | `Driver.BirthDate` | Necesaria para calcular la edad del conductor al expedir la licencia. No cambia. |
+| Licencia de conducción | `DriverLicense` | Value object con categoría, expedición y vencimiento. Se crea con `DriverLicense.Create(category, issuedOn, expiresOn, birthDate)`. |
+| Fecha de expedición | `DriverLicense.IssuedOn` | Fecha en que se expidió la licencia (`DateOnly`). |
+| Fecha de vencimiento | `DriverLicense.ExpiresOn` | Último día en que la licencia es válida (`DateOnly`). |
+| Categoría de licencia | `LicenseCategory` | Enumeración ordenada `C1 < C2 < C3`. Solo categorías de servicio público: las categorías B (servicio particular) no se aceptan. Norma: Resolución 1500 de 2005, art. 5. Una categoría superior habilita las inferiores (art. 5, parágrafo 1). |
+| Vigencia de la licencia | `DriverLicense.IsValidOn(date)` | Válida entre `IssuedOn` y `ExpiresOn`, ambos incluidos. Plazo máximo: 3 años si el conductor tenía menos de 60 años al expedirla, 1 año si tenía 60 o más. Norma: Ley 769 de 2002, art. 22, modificado por el Decreto 019 de 2012, art. 197. |
+| Habilita tipo de camión | `DriverLicense.Allows(LicenseCategory)` | Indica si la categoría de la licencia basta para una categoría mínima exigida. No conoce `TruckType`: las reglas entre agregados viven en `TruckAssignmentPolicy`. |
+| Estado del conductor | `DriverStatus` | `Active` (activo), `OnLeave` (vacaciones, incapacidad o licencia) e `Inactive` (retirado de la empresa). |
+| Dado de baja (conductor) | `Driver.DeletedAt` distinto de nulo | Borrado lógico. Un conductor dado de baja no se modifica. |
+| Registrar conductor | `Driver.Register(...)` | Crea el agregado, con licencia inicial, y registra `DriverRegistered`. |
+| Cambio de estado (conductor) | `Driver.ChangeStatus(...)` | Registra `DriverStatusChanged` con el estado anterior y el nuevo. |
+| Renovar licencia | `Driver.RenewLicense(...)` | Reemplaza la licencia por una nueva validada con la fecha de nacimiento del conductor. |
+
 ## Eventos de dominio
 
 | Evento | Cuándo ocurre | Quién reacciona |
 | --- | --- | --- |
 | `TruckRegistered` | Se registra un camión nuevo. | `LogOnTruckRegistered` (registra el alta en el log). |
 | `TruckStatusChanged` | Cambia el estado de un camión. | `LogOnTruckStatusChanged` (registra el cambio en el log). |
+| `DriverRegistered` | Se registra un conductor nuevo. | Pendiente (se añade con la feature `Drivers`). |
+| `DriverStatusChanged` | Cambia el estado de un conductor. | Pendiente: `Assignments` libera la asignación en `OnLeave` o `Inactive` (paso 6). |
+| `DriverDeleted` | Se da de baja un conductor (borrado lógico). | Pendiente: `Assignments` libera la asignación (paso 6). |
