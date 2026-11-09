@@ -30,6 +30,12 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | --- | --- | --- |
 | Conductor | `Driver` | Agregado raíz de la feature `Drivers`. Se identifica con un `Guid` UUID v7. |
 | Cédula | `DocumentNumber` | Número de cédula del conductor. Solo dígitos, entre 6 y 10. Único en el sistema. |
+| Nombre | `Driver.FirstName` | Nombre(s) del conductor. Obligatorio. |
+| Apellidos | `Driver.LastName` | Apellidos del conductor. Obligatorio. |
+| Dirección | `Driver.Address` | Dirección de residencia. Obligatoria. |
+| Teléfono | `Driver.Phone` | Teléfono de contacto. Obligatorio. |
+| Correo | `Driver.Email` | Correo electrónico de contacto. Obligatorio. El formato se valida en la petición, no en el agregado. |
+| Foto de perfil | `Driver.ProfilePhotoUrl` | Opcional. Referencia a la imagen; el archivo lo gestionará la feature `Documents` (fuera de esta fase). |
 | Fecha de nacimiento | `Driver.BirthDate` | Necesaria para calcular la edad del conductor al expedir la licencia. No cambia. |
 | Licencia de conducción | `DriverLicense` | Value object con categoría, expedición y vencimiento. Se crea con `DriverLicense.Create(category, issuedOn, expiresOn, birthDate)`. |
 | Fecha de expedición | `DriverLicense.IssuedOn` | Fecha en que se expidió la licencia (`DateOnly`). |

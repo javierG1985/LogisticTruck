@@ -16,7 +16,18 @@ public sealed class Driver : AggregateRoot
 
     public DocumentNumber DocumentNumber { get; private set; } = null!;
 
-    public string FullName { get; private set; } = string.Empty;
+    public string FirstName { get; private set; } = string.Empty;
+
+    public string LastName { get; private set; } = string.Empty;
+
+    public string Address { get; private set; } = string.Empty;
+
+    public string Phone { get; private set; } = string.Empty;
+
+    public string Email { get; private set; } = string.Empty;
+
+    // Opcional. Guarda la referencia a la imagen; el archivo lo gestionará la feature Documents (fuera de esta fase).
+    public string? ProfilePhotoUrl { get; private set; }
 
     public DateOnly BirthDate { get; private set; }
 
@@ -35,12 +46,17 @@ public sealed class Driver : AggregateRoot
 
     public static Driver Register(
         DocumentNumber documentNumber,
-        string fullName,
+        string firstName,
+        string lastName,
+        string address,
+        string phone,
+        string email,
         DateOnly birthDate,
         LicenseCategory licenseCategory,
         DateOnly licenseIssuedOn,
         DateOnly licenseExpiresOn,
-        DateTime utcNow)
+        DateTime utcNow,
+        string? profilePhotoUrl = null)
     {
         var driver = new Driver(Guid.CreateVersion7())
         {
@@ -49,20 +65,29 @@ public sealed class Driver : AggregateRoot
             Status = DriverStatus.Active,
             CreatedAt = utcNow,
             UpdatedAt = utcNow,
-            FullName = NormalizeFullName(fullName),
             License = DriverLicense.Create(licenseCategory, licenseIssuedOn, licenseExpiresOn, birthDate),
         };
+
+        driver.ApplyContact(firstName, lastName, address, phone, email, profilePhotoUrl);
 
         driver.Raise(new DriverRegistered(driver.Id, documentNumber.Value));
 
         return driver;
     }
 
-    public void Update(string fullName, DateTime utcNow)
+    // Reemplaza los datos de contacto. Una foto ausente (null) quita la foto anterior.
+    public void Update(
+        string firstName,
+        string lastName,
+        string address,
+        string phone,
+        string email,
+        DateTime utcNow,
+        string? profilePhotoUrl = null)
     {
         EnsureNotDeleted();
 
-        FullName = NormalizeFullName(fullName);
+        ApplyContact(firstName, lastName, address, phone, email, profilePhotoUrl);
         UpdatedAt = utcNow;
     }
 
@@ -105,6 +130,22 @@ public sealed class Driver : AggregateRoot
         Raise(new DriverDeleted(Id));
     }
 
+    private void ApplyContact(
+        string firstName,
+        string lastName,
+        string address,
+        string phone,
+        string email,
+        string? profilePhotoUrl)
+    {
+        FirstName = Required(firstName, "El nombre del conductor es obligatorio.");
+        LastName = Required(lastName, "Los apellidos del conductor son obligatorios.");
+        Address = Required(address, "La dirección del conductor es obligatoria.");
+        Phone = Required(phone, "El teléfono del conductor es obligatorio.");
+        Email = Required(email, "El correo del conductor es obligatorio.");
+        ProfilePhotoUrl = string.IsNullOrWhiteSpace(profilePhotoUrl) ? null : profilePhotoUrl.Trim();
+    }
+
     private void EnsureNotDeleted()
     {
         if (DeletedAt is not null)
@@ -113,13 +154,13 @@ public sealed class Driver : AggregateRoot
         }
     }
 
-    private static string NormalizeFullName(string? fullName)
+    private static string Required(string? value, string message)
     {
-        var normalized = fullName?.Trim();
+        var normalized = value?.Trim();
 
         if (string.IsNullOrEmpty(normalized))
         {
-            throw new DomainException("El nombre del conductor es obligatorio.");
+            throw new DomainException(message);
         }
 
         return normalized;

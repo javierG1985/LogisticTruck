@@ -17,11 +17,35 @@ public sealed class DriverTests
         var driver = CreateDriver();
 
         Assert.Equal(DriverStatus.Active, driver.Status);
-        Assert.Equal("Ana Gómez", driver.FullName);
+        Assert.Equal("Ana", driver.FirstName);
+        Assert.Equal("Gómez Ruiz", driver.LastName);
+        Assert.Equal("Calle 10 # 20-30", driver.Address);
+        Assert.Equal("3001234567", driver.Phone);
+        Assert.Equal("ana@example.com", driver.Email);
 
         var domainEvent = Assert.IsType<DriverRegistered>(Assert.Single(driver.DomainEvents));
         Assert.Equal(driver.Id, domainEvent.DriverId);
         Assert.Equal("1234567890", domainEvent.DocumentNumber);
+    }
+
+    [Fact]
+    public void Register_WithoutProfilePhoto_LeavesItEmpty()
+    {
+        var driver = CreateDriver();
+
+        Assert.Null(driver.ProfilePhotoUrl);
+    }
+
+    [Fact]
+    public void Register_WithProfilePhoto_StoresTheReference()
+    {
+        var driver = Driver.Register(
+            DocumentNumber.Create("1234567890"),
+            "Ana", "Gómez Ruiz", "Calle 10 # 20-30", "3001234567", "ana@example.com",
+            BirthDate, LicenseCategory.C2, LicenseIssuedOn, LicenseExpiresOn, Now,
+            profilePhotoUrl: "  fotos/ana.jpg ");
+
+        Assert.Equal("fotos/ana.jpg", driver.ProfilePhotoUrl);
     }
 
     [Fact]
@@ -30,7 +54,7 @@ public sealed class DriverTests
         // Conductor de 62 años: la licencia no puede durar más de 1 año.
         Assert.Throws<DomainException>(() => Driver.Register(
             DocumentNumber.Create("1234567890"),
-            "Ana Gómez",
+            "Ana", "Gómez Ruiz", "Calle 10 # 20-30", "3001234567", "ana@example.com",
             new DateOnly(1964, 1, 1),
             LicenseCategory.C2,
             LicenseIssuedOn,
@@ -38,17 +62,21 @@ public sealed class DriverTests
             Now));
     }
 
-    [Fact]
-    public void Register_WithBlankName_ThrowsDomainException()
+    [Theory]
+    [InlineData("", "Gómez Ruiz", "Calle 10", "3001234567", "ana@example.com", "El nombre del conductor es obligatorio.")]
+    [InlineData("Ana", "  ", "Calle 10", "3001234567", "ana@example.com", "Los apellidos del conductor son obligatorios.")]
+    [InlineData("Ana", "Gómez Ruiz", "", "3001234567", "ana@example.com", "La dirección del conductor es obligatoria.")]
+    [InlineData("Ana", "Gómez Ruiz", "Calle 10", " ", "ana@example.com", "El teléfono del conductor es obligatorio.")]
+    [InlineData("Ana", "Gómez Ruiz", "Calle 10", "3001234567", null, "El correo del conductor es obligatorio.")]
+    public void Register_WithMissingContactField_ThrowsDomainException(
+        string firstName, string lastName, string address, string phone, string? email, string expectedMessage)
     {
-        Assert.Throws<DomainException>(() => Driver.Register(
+        var exception = Assert.Throws<DomainException>(() => Driver.Register(
             DocumentNumber.Create("1234567890"),
-            "   ",
-            BirthDate,
-            LicenseCategory.C2,
-            LicenseIssuedOn,
-            LicenseExpiresOn,
-            Now));
+            firstName, lastName, address, phone, email ?? string.Empty,
+            BirthDate, LicenseCategory.C2, LicenseIssuedOn, LicenseExpiresOn, Now));
+
+        Assert.Equal(expectedMessage, exception.Message);
     }
 
     [Fact]
@@ -77,13 +105,31 @@ public sealed class DriverTests
     }
 
     [Fact]
-    public void Update_ChangesFullName()
+    public void Update_ReplacesContactDataAndPhoto()
     {
         var driver = CreateDriver();
 
-        driver.Update("  Ana María Gómez ", Now);
+        driver.Update("Ana María", "Gómez", "Carrera 5 # 1-2", "3109876543", "nueva@example.com", Now, "fotos/ana.png");
 
-        Assert.Equal("Ana María Gómez", driver.FullName);
+        Assert.Equal("Ana María", driver.FirstName);
+        Assert.Equal("Carrera 5 # 1-2", driver.Address);
+        Assert.Equal("3109876543", driver.Phone);
+        Assert.Equal("nueva@example.com", driver.Email);
+        Assert.Equal("fotos/ana.png", driver.ProfilePhotoUrl);
+    }
+
+    [Fact]
+    public void Update_WithoutPhoto_RemovesThePreviousPhoto()
+    {
+        var driver = Driver.Register(
+            DocumentNumber.Create("1234567890"),
+            "Ana", "Gómez Ruiz", "Calle 10 # 20-30", "3001234567", "ana@example.com",
+            BirthDate, LicenseCategory.C2, LicenseIssuedOn, LicenseExpiresOn, Now,
+            profilePhotoUrl: "fotos/ana.jpg");
+
+        driver.Update("Ana", "Gómez Ruiz", "Calle 10 # 20-30", "3001234567", "ana@example.com", Now);
+
+        Assert.Null(driver.ProfilePhotoUrl);
     }
 
     [Fact]
@@ -92,7 +138,7 @@ public sealed class DriverTests
         // Conductor de 62 años: la renovación no puede durar más de 1 año, aunque la licencia anterior sí.
         var driver = Driver.Register(
             DocumentNumber.Create("1234567890"),
-            "Ana Gómez",
+            "Ana", "Gómez Ruiz", "Calle 10 # 20-30", "3001234567", "ana@example.com",
             new DateOnly(1964, 1, 1),
             LicenseCategory.C2,
             new DateOnly(2026, 1, 15),
@@ -135,7 +181,8 @@ public sealed class DriverTests
         var driver = CreateDriver();
         driver.Delete(Now);
 
-        Assert.Throws<DomainException>(() => driver.Update("Otro nombre", Now));
+        Assert.Throws<DomainException>(() => driver.Update(
+            "Otro", "Nombre", "Calle 1", "3000000000", "otro@example.com", Now));
     }
 
     [Fact]
@@ -159,7 +206,11 @@ public sealed class DriverTests
 
     private static Driver CreateDriver() => Driver.Register(
         DocumentNumber.Create("1234567890"),
-        "Ana Gómez",
+        "Ana",
+        "Gómez Ruiz",
+        "Calle 10 # 20-30",
+        "3001234567",
+        "ana@example.com",
         BirthDate,
         LicenseCategory.C2,
         LicenseIssuedOn,
