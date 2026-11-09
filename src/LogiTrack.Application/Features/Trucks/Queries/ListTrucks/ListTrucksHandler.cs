@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using LogiTrack.Application.Common.Abstractions;
 using LogiTrack.Application.Common.Pagination;
+using LogiTrack.Application.Common.Search;
 using LogiTrack.Domain.Aggregates.Trucks;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
@@ -49,16 +50,18 @@ public sealed class ListTrucksHandler(IApplicationDbContext db) : IQueryHandler<
 
     private static IQueryable<Truck> ApplySearch(IQueryable<Truck> trucks, string search)
     {
-        // Búsqueda sin distinguir mayúsculas. EF.Functions.Like es portable entre proveedores (sin ILIKE de Npgsql).
-        var brandPattern = $"%{search.ToLowerInvariant()}%";
+        // Búsqueda sin distinguir mayúsculas, mediante TextSearch (ver Common/Search/TextSearch.cs).
+        var brandPattern = TextSearch.ToContainsPattern(search);
 
         // Una placa completa y válida se busca exacta; cualquier otro texto busca dentro de la marca.
         if (Plate.TryCreate(search, out var plate))
         {
-            return trucks.Where(truck => truck.Plate == plate || EF.Functions.Like(truck.Brand.ToLowerInvariant(), brandPattern));
+            return trucks.Where(truck =>
+                truck.Plate == plate
+                || EF.Functions.Like(TextSearch.ToLowerText(truck.Brand), brandPattern, TextSearch.EscapeCharacter));
         }
 
-        return trucks.Where(truck => EF.Functions.Like(truck.Brand.ToLowerInvariant(), brandPattern));
+        return trucks.Where(truck => EF.Functions.Like(TextSearch.ToLowerText(truck.Brand), brandPattern, TextSearch.EscapeCharacter));
     }
 
     private static IOrderedQueryable<Truck> ApplySort(IQueryable<Truck> trucks, string? sort)

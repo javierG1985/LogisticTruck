@@ -1,3 +1,4 @@
+using LogiTrack.Application.Features.Drivers;
 using LogiTrack.Domain.Aggregates.Drivers;
 using Mediator;
 
@@ -14,4 +15,4 @@ public sealed record CreateDriverCommand(
     LicenseCategory LicenseCategory,
     DateOnly LicenseIssuedOn,
     DateOnly LicenseExpiresOn,
-    string? ProfilePhotoUrl) : ICommand<DriverDetailsResponse>;
+    string? ProfilePhotoUrl) : ICommand<DriverDetailsResponse>, IDriverProfile;

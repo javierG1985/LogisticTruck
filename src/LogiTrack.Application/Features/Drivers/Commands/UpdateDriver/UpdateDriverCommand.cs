@@ -1,3 +1,4 @@
+using LogiTrack.Application.Features.Drivers;
 using LogiTrack.Domain.Aggregates.Drivers;
 using Mediator;
 
@@ -16,4 +17,4 @@ public sealed record UpdateDriverCommand(
     string? ProfilePhotoUrl,
     LicenseCategory LicenseCategory,
     DateOnly LicenseIssuedOn,
-    DateOnly LicenseExpiresOn) : ICommand<uint>;
+    DateOnly LicenseExpiresOn) : ICommand<uint>, IDriverProfile;

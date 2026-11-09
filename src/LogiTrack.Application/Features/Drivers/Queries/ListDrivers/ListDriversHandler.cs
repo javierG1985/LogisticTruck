@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using LogiTrack.Application.Common.Abstractions;
 using LogiTrack.Application.Common.Pagination;
+using LogiTrack.Application.Common.Search;
 using LogiTrack.Domain.Aggregates.Drivers;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
@@ -65,29 +66,24 @@ public sealed class ListDriversHandler(IApplicationDbContext db) : IQueryHandler
         return new PagedResult<DriverListItem>(items, query.Page, query.PageSize, totalCount);
     }
 
-    // EF Core traduce ToLower() a LOWER() en SQL, pero no ToLowerInvariant(). Por eso la columna usa ToLower()
-    // y solo el texto buscado usa ToLowerInvariant(). Las advertencias de cultura solo aplican al lado de la columna.
-#pragma warning disable CA1304, CA1311
     private static IQueryable<Driver> ApplySearch(IQueryable<Driver> drivers, string search)
     {
-        // Búsqueda sin distinguir mayúsculas. EF.Functions.Like es portable entre proveedores (sin ILIKE de Npgsql).
-        var namePattern = $"%{search.ToLowerInvariant()}%";
+        // Búsqueda sin distinguir mayúsculas, mediante TextSearch (ver Common/Search/TextSearch.cs).
+        var namePattern = TextSearch.ToContainsPattern(search);
 
         // Una cédula completa y válida se busca exacta; cualquier otro texto busca dentro del nombre o los apellidos.
         if (DocumentNumber.TryCreate(search, out var documentNumber))
         {
             return drivers.Where(driver =>
                 driver.DocumentNumber == documentNumber
-                || EF.Functions.Like(driver.FirstName.ToLower(), namePattern)
-                || EF.Functions.Like(driver.LastName.ToLower(), namePattern));
+                || EF.Functions.Like(TextSearch.ToLowerText(driver.FirstName), namePattern, TextSearch.EscapeCharacter)
+                || EF.Functions.Like(TextSearch.ToLowerText(driver.LastName), namePattern, TextSearch.EscapeCharacter));
         }
 
         return drivers.Where(driver =>
-            EF.Functions.Like(driver.FirstName.ToLower(), namePattern)
-            || EF.Functions.Like(driver.LastName.ToLower(), namePattern));
+            EF.Functions.Like(TextSearch.ToLowerText(driver.FirstName), namePattern, TextSearch.EscapeCharacter)
+            || EF.Functions.Like(TextSearch.ToLowerText(driver.LastName), namePattern, TextSearch.EscapeCharacter));
     }
-
-#pragma warning restore CA1304, CA1311
 
     private static IOrderedQueryable<Driver> ApplySort(IQueryable<Driver> drivers, string? sort)
     {
