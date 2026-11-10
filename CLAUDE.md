@@ -24,11 +24,14 @@ Una misma palabra identifica una parte del negocio en todas las capas. Para cami
 | `Infrastructure` | `Persistence/Configurations/` | `TruckConfiguration.cs` (un archivo de mapeo por entidad) |
 | `Api` | `Controllers/Trucks/` | `TrucksController.cs` y `Requests/` con los cuerpos HTTP |
 
-Los esquemas de PostgreSQL siguen el área de negocio: `Trucks` va en `fleet`; más adelante `Shipments` en `shipping` y `Invoices` en `billing`. Hay un solo `AppDbContext`.
+Features actuales: `Trucks` (camiones), `Drivers` (conductores) y `Assignments` (qué conductor maneja qué camión). `Assignments` tiene su agregado en `Aggregates/Assignments/`, aunque su feature también es `Assignments`.
+
+Los esquemas de PostgreSQL siguen el área de negocio: `Trucks`, `Drivers` y `Assignments` van en `fleet`; más adelante `Shipments` en `shipping` y `Invoices` en `billing`. Hay un solo `AppDbContext`.
 
 ## Reglas de diseño
 
 1. **Reglas de negocio solo en `Domain/Aggregates/<Agregado>/`.** Los agregados heredan de `AggregateRoot`, tienen setters privados y se cambian con métodos con intención (`ChangeStatus`, `Delete`). Las reglas violadas lanzan `DomainException` (409).
+   - **Excepción documentada (ADR 0003):** `Aggregates/Assignments/TruckAssignmentPolicy.cs` es la única pieza del dominio que referencia `Truck` y `Driver` a la vez. La prueba de arquitectura la exime por nombre, y no hay otra excepción.
 2. **CQRS en cada feature:** `Commands/<CasoDeUso>/` implementa `ICommand` o `ICommand<T>`; `Queries/<CasoDeUso>/` implementa `IQuery<T>`. `EventHandlers/` reacciona a domain events.
 3. **Un caso de uso = una carpeta** con su comando o consulta, su validador (si hay entrada) y su handler. La respuesta compartida por varios casos de uso de la feature vive en la raíz de la feature (`Features/Trucks/TruckDetailsResponse.cs`). No se comparten DTOs entre features.
 4. **Validación ≠ regla de negocio.** FluentValidation revisa la forma (obligatorio, longitud, formato). El agregado protege las invariantes. Si la regla vive en `Plate`, el validador la consulta (`Plate.TryCreate`), no la repite.
@@ -40,7 +43,10 @@ Los esquemas de PostgreSQL siguen el área de negocio: `Trucks` va en `fleet`; m
 10. **Controladores delgados:** `sealed`, solo `ISender` en el constructor, `ActionResult<T>`, rutas por atributo y `[ProducesResponseType]` en cada acción.
 11. **Errores en ProblemDetails (RFC 9457)** mediante `GlobalExceptionHandler`. Nunca se devuelve el stack trace.
 12. **`CancellationToken`** en acciones, handlers y llamadas a la base de datos.
-13. **Eventos de dominio después de guardar.** `DispatchDomainEventsInterceptor` los publica tras un `SaveChanges` exitoso y luego los limpia del agregado.
+13. **Eventos de dominio después de guardar.** `DispatchDomainEventsInterceptor` los publica tras un `SaveChanges` exitoso y luego los limpia del agregado. Un handler de evento puede guardar (por ejemplo, liberar asignaciones). Si falla, la petición original responde 500 aunque el cambio ya esté guardado (ADR 0002): los handlers deben ser idempotentes.
+14. **Búsqueda sin mayúsculas.** Se usa `TextSearch.ToLowerText` y `TextSearch.ToContainsPattern` (`Common/Search/`), que EF traduce a `lower()` y escapa los comodines. Nunca `ToLower()` ni `ToLowerInvariant()` dentro de una consulta: EF no los traduce.
+15. **Orden con `SortMap<T>`.** Cada recurso declara sus campos una sola vez en `Features/<Feature>/<Recurso>Sorts.cs` (por ejemplo, `TruckSorts`). El validador usa `Map.Accepts` y el handler `Map.Apply`. Ni validadores ni handlers repiten la lista de campos.
+16. **Concurrencia de asignaciones.** Asignar y liberar usan `If-Match` con la versión del **camión** (`TruckAssignmentLookup`, `Common/Concurrency/VersionCheck`). La unicidad de camión y conductor activos la garantizan los índices únicos parciales (`WHERE released_at IS NULL`), no la comprobación previa.
 
 ## Convenciones de nombres
 
@@ -59,6 +65,7 @@ Los esquemas de PostgreSQL siguen el área de negocio: `Trucks` va en `fleet`; m
 | Acciones | Verbo del caso de uso, sin `Async` | `List`, `GetById`, `Create`, `Update`, `ChangeStatus`, `Delete` |
 | Domain events | Hecho en pasado | `TruckRegistered`, `TruckStatusChanged` |
 | Handlers de eventos | Qué hace + `On` + evento | `LogOnTruckStatusChanged` |
+| Orden por recurso | Recurso + `Sorts` | `TruckSorts`, `DriverSorts`, `AssignmentSorts` |
 | Configuraciones EF | Entidad + `Configuration` | `TruckConfiguration` |
 | Registro de servicios | `Add<Capa>()` en `DependencyInjection.cs` | `AddApplication()`, `AddInfrastructure(config)`, `AddPresentation()` |
 | Tablas | snake_case, plural, esquema por área | `fleet.trucks.capacity_kg` |
@@ -82,6 +89,17 @@ Los esquemas de PostgreSQL siguen el área de negocio: `Trucks` va en `fleet`; m
 
 **Concurrencia:** `GET` y `POST` devuelven `ETag` con la versión (`xmin`). `PUT`, `PATCH` y `DELETE` exigen `If-Match`: sin él, 428; con una versión vieja, 412. El helper está en `Api/Http/ETag.cs`.
 
+**Asignaciones** (feature `Assignments`):
+
+| Operación | Verbo y ruta | Éxito | Errores |
+| --- | --- | --- | --- |
+| Ver asignación actual de un camión | `GET /api/trucks/{truckId}/assignment` | 200 | 404 |
+| Asignar conductor a un camión | `PUT /api/trucks/{truckId}/assignment` | 204 + `ETag` del camión | 400, 404, 409, 412, 428 |
+| Liberar la asignación | `DELETE /api/trucks/{truckId}/assignment` | 204 | 404, 409, 412, 428 |
+| Listar asignaciones | `GET /api/assignments?truckId=&driverId=&active=` | 200 `PagedResult<T>` | 400 |
+
+`If-Match` de estas operaciones es la versión del **camión**, no de la asignación (ver regla 16).
+
 ## Recetas
 
 ### Cómo agregar un caso de uso
@@ -95,9 +113,16 @@ Los esquemas de PostgreSQL siguen el área de negocio: `Trucks` va en `fleet`; m
 ### Cómo agregar un agregado nuevo
 
 1. `Domain/Aggregates/<Agregado>/`: la clase (heredando de `AggregateRoot`), sus value objects y sus eventos en `Events/`.
-2. `Infrastructure/Persistence/Configurations/<Agregado>Configuration.cs`: tabla con su esquema, conversiones y query filter.
+2. `Infrastructure/Persistence/Configurations/<Agregado>Configuration.cs`: tabla con su esquema, conversiones y query filter. La prueba de arquitectura `Aggregates_HaveEntityTypeConfiguration` falla si falta.
 3. `IApplicationDbContext` y `AppDbContext`: añade el `DbSet<T>`.
 4. `dotnet ef migrations add <Nombre>` y revisa el SQL.
+
+### Cómo agregar un evento de dominio
+
+1. `Domain/Aggregates/<Agregado>/Events/<Hecho>.cs`: un `record` que implementa `IDomainEvent`. Nombre en pasado.
+2. Lo lanza el agregado con `Raise(...)` dentro del método con intención.
+3. Un handler en `Application/Features/<Feature>/EventHandlers/` que implemente `INotificationHandler<T>`. Mediator no compila un evento sin handler, y la prueba `DomainEvents_HaveAtLeastOneHandler` lo vuelve a comprobar.
+4. Prueba de integración que confirme la reacción.
 
 ## Comandos habituales
 
@@ -118,7 +143,9 @@ dotnet ef database update -p src/LogiTrack.Infrastructure -s src/LogiTrack.Api
 - No expongas agregados en controladores: solo comandos, consultas y respuestas.
 - No uses Npgsql en `Application`.
 - No agregues Repository genérico, AutoMapper, carpetas `Services/` o `Helpers/` genéricas.
-- No hagas referencias entre features ni entre agregados.
+- No hagas referencias entre features ni entre agregados. La única excepción es `TruckAssignmentPolicy` (regla 1 y ADR 0003).
+- No uses `ToLower()` ni `ToLowerInvariant()` en consultas EF. Usa `TextSearch`.
+- No pongas `HasDefaultValue` en un enum que el dominio siempre rellena: un 0 llegaría a la base de datos y se guardaría en silencio. El default va solo en la migración (ver `AddTruckType`).
 - No compartas DTOs entre features.
 - No pongas credenciales de producción en el repositorio. `appsettings.Development.json` y `docker-compose.yml` solo tienen credenciales locales.
 - No edites migraciones ya aplicadas; crea una nueva.

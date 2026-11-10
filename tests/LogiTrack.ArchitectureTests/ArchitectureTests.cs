@@ -1,4 +1,5 @@
 using System.Reflection;
+using LogiTrack.Domain.SharedKernel;
 using Mediator;
 using NetArchTest.Rules;
 
@@ -171,6 +172,74 @@ public sealed class ArchitectureTests
         }
     }
 
+    // Cada evento de dominio debe tener al menos un handler: Mediator no compila un evento sin él, y esta prueba
+    // impide que un handler se borre sin que se note hasta el despacho en producción.
+    [Fact]
+    public void DomainEvents_HaveAtLeastOneHandler()
+    {
+        var events = DomainAssembly.GetTypes()
+            .Where(type => type is { IsClass: true, IsAbstract: false } && typeof(IDomainEvent).IsAssignableFrom(type))
+            .ToList();
+
+        Assert.NotEmpty(events);
+
+        var handledEvents = ApplicationAssembly.GetTypes()
+            .SelectMany(type => type.GetInterfaces())
+            .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(INotificationHandler<>))
+            .Select(i => i.GetGenericArguments()[0])
+            .ToHashSet();
+
+        var unhandled = events.Where(domainEvent => !handledEvents.Contains(domainEvent)).Select(domainEvent => domainEvent.FullName);
+
+        Assert.Empty(unhandled);
+    }
+
+    [Fact]
+    public void EventHandlers_ImplementINotificationHandler_AreRequired()
+    {
+        // El espacio de nombres termina en EventHandlers (no hay nada detrás), así que IsInFolder no sirve aquí.
+        var handlers = ApplicationAssembly.GetTypes()
+            .Where(type => type.Namespace?.EndsWith(".EventHandlers", StringComparison.Ordinal) == true)
+            // El compilador genera clases auxiliares para las lambdas (nombres con "<"); no son handlers.
+            .Where(type => type.IsClass && !type.Name.Contains('<'))
+            .ToList();
+
+        Assert.NotEmpty(handlers);
+
+        foreach (var handler in handlers)
+        {
+            var implementsHandler = handler.GetInterfaces().Any(i =>
+                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(INotificationHandler<>));
+
+            Assert.True(implementsHandler, $"{handler.FullName} está en EventHandlers/ pero no implementa INotificationHandler<T>.");
+        }
+    }
+
+    // Cada agregado debe tener su configuración EF: sin ella, la tabla no se crea y el cambio falla en tiempo de ejecución.
+    [Fact]
+    public void Aggregates_HaveEntityTypeConfiguration()
+    {
+        var aggregates = DomainAssembly.GetTypes()
+            .Where(type => type is { IsClass: true, IsAbstract: false } && typeof(AggregateRoot).IsAssignableFrom(type))
+            .ToList();
+
+        Assert.NotEmpty(aggregates);
+
+        var configured = InfrastructureAssembly.GetTypes()
+            .SelectMany(type => type.GetInterfaces())
+            .Where(i => i.IsGenericType && i.GetGenericTypeDefinition().FullName == EntityTypeConfigurationName)
+            .Select(i => i.GetGenericArguments()[0])
+            .ToHashSet();
+
+        var missing = aggregates.Where(aggregate => !configured.Contains(aggregate)).Select(aggregate => aggregate.FullName);
+
+        Assert.Empty(missing);
+    }
+
+    // Nombre completo del tipo de EF Core. Se compara por nombre para no añadir EF Core a este proyecto de pruebas.
+    private const string EntityTypeConfigurationName = "Microsoft.EntityFrameworkCore.IEntityTypeConfiguration`1";
+
+    // Única excepción a la regla de agregados: la política que combina camión y conductor (ver ADR 0003).
     private const string CrossAggregatePolicy = "TruckAssignmentPolicy";
 
     // Un agregado o una feature no puede depender de otro del mismo tipo: se comunican con eventos.
