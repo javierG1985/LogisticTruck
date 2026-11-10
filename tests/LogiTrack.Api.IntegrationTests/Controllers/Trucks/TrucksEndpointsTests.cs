@@ -44,6 +44,43 @@ public sealed class TrucksEndpointsTests(ApiFactory factory) : IClassFixture<Api
     }
 
     [Fact]
+    public async Task Create_WithoutTruckType_ReturnsBadRequestOnTruckType()
+    {
+        var body = new
+        {
+            plate = "NOT100",
+            brand = "Kenworth",
+            modelYear = 2022,
+            capacityKg = 8000,
+            volumeM3 = 30,
+            soatExpiresOn = "2027-01-31",
+            techReviewExpiresOn = "2027-06-30",
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/trucks", body);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var errors = await response.Content.ReadFromJsonAsync<JsonNode>();
+        Assert.NotNull(errors!["errors"]!["truckType"]);
+    }
+
+    [Fact]
+    public async Task List_FilteredByTruckType_ReturnsOnlyThatType()
+    {
+        var articulatedPlate = "FLT100";
+        var rigidPlate = "FLT200";
+        await CreateTruckAsync(articulatedPlate, truckType: "Articulated");
+        await CreateTruckAsync(rigidPlate, truckType: "Rigid");
+
+        var body = await _client.GetFromJsonAsync<JsonNode>("/api/trucks?truckType=Articulated&pageSize=100");
+
+        var items = body!["items"]!.AsArray();
+        Assert.Contains(items, item => item!["plate"]!.GetValue<string>() == articulatedPlate);
+        Assert.DoesNotContain(items, item => item!["plate"]!.GetValue<string>() == rigidPlate);
+        Assert.All(items, item => Assert.Equal("Articulated", item!["truckType"]!.GetValue<string>()));
+    }
+
+    [Fact]
     public async Task GetById_WithUnknownId_ReturnsNotFound()
     {
         var response = await _client.GetAsync($"/api/trucks/{Guid.NewGuid()}");
@@ -82,6 +119,7 @@ public sealed class TrucksEndpointsTests(ApiFactory factory) : IClassFixture<Api
             Content = JsonContent.Create(new
             {
                 brand = "Volvo FH",
+                truckType = "Articulated",
                 modelYear = 2023,
                 capacityKg = 9000,
                 volumeM3 = 35,
@@ -178,9 +216,9 @@ public sealed class TrucksEndpointsTests(ApiFactory factory) : IClassFixture<Api
         Assert.Equal(HttpStatusCode.PreconditionRequired, response.StatusCode);
     }
 
-    private async Task<Guid> CreateTruckAsync(string plate)
+    private async Task<Guid> CreateTruckAsync(string plate, string truckType = "Rigid")
     {
-        var response = await _client.PostAsJsonAsync("/api/trucks", NewTruckBody(plate));
+        var response = await _client.PostAsJsonAsync("/api/trucks", NewTruckBody(plate, truckType: truckType));
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
         var body = await response.Content.ReadFromJsonAsync<JsonNode>();
@@ -204,10 +242,11 @@ public sealed class TrucksEndpointsTests(ApiFactory factory) : IClassFixture<Api
         return await _client.SendAsync(request);
     }
 
-    private static object NewTruckBody(string plate, string brand = "Kenworth") => new
+    private static object NewTruckBody(string plate, string brand = "Kenworth", string truckType = "Rigid") => new
     {
         plate,
         brand,
+        truckType,
         modelYear = 2022,
         capacityKg = 8000,
         volumeM3 = 30,
@@ -218,6 +257,7 @@ public sealed class TrucksEndpointsTests(ApiFactory factory) : IClassFixture<Api
     private static object NewUpdateBody() => new
     {
         brand = "Kenworth",
+        truckType = "Rigid",
         modelYear = 2022,
         capacityKg = 8000,
         volumeM3 = 30,

@@ -38,6 +38,7 @@ public sealed class TruckDomainEventsTests(ApiFactory factory) : IClassFixture<A
         {
             plate,
             brand = "Kenworth",
+            truckType = "Rigid",
             modelYear = 2022,
             capacityKg = 8000,
             volumeM3 = 30,

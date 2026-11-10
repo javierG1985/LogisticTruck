@@ -26,6 +26,7 @@ public sealed class CreateTruckHandler(IApplicationDbContext db, TimeProvider ti
         var truck = Truck.Register(
             plate,
             command.Brand,
+            command.TruckType,
             command.ModelYear,
             command.CapacityKg,
             command.VolumeM3,

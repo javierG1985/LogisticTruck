@@ -6,6 +6,7 @@ public sealed record TruckListItem(
     Guid Id,
     string Plate,
     string Brand,
+    TruckType TruckType,
     int ModelYear,
     decimal CapacityKg,
     TruckStatus Status);

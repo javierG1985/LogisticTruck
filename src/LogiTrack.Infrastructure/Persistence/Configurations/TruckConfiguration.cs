@@ -27,6 +27,9 @@ public sealed class TruckConfiguration : IEntityTypeConfiguration<Truck>
         builder.HasIndex(truck => truck.Plate).IsUnique();
 
         builder.Property(truck => truck.Brand).HasMaxLength(60).IsRequired();
+        // Sin default en el modelo: un valor no válido nunca se guarda en silencio. La migración AddTruckType
+        // rellena los camiones que ya existían con Rigid y quita el default de la columna.
+        builder.Property(truck => truck.TruckType).HasConversion<string>().HasMaxLength(20);
         builder.Property(truck => truck.ModelYear);
         builder.Property(truck => truck.CapacityKg).HasPrecision(10, 2);
         builder.Property(truck => truck.VolumeM3).HasPrecision(8, 2);

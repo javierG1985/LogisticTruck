@@ -18,6 +18,8 @@ public sealed class Truck : AggregateRoot
 
     public string Brand { get; private set; } = string.Empty;
 
+    public TruckType TruckType { get; private set; }
+
     public int ModelYear { get; private set; }
 
     public decimal CapacityKg { get; private set; }
@@ -42,6 +44,7 @@ public sealed class Truck : AggregateRoot
     public static Truck Register(
         Plate plate,
         string brand,
+        TruckType truckType,
         int modelYear,
         decimal capacityKg,
         decimal volumeM3,
@@ -59,7 +62,7 @@ public sealed class Truck : AggregateRoot
             UpdatedAt = utcNow,
         };
 
-        truck.ApplyDetails(brand, modelYear, capacityKg, volumeM3, soatExpiresOn, techReviewExpiresOn);
+        truck.ApplyDetails(brand, truckType, modelYear, capacityKg, volumeM3, soatExpiresOn, techReviewExpiresOn);
         truck.Raise(new TruckRegistered(truck.Id, plate.Value));
 
         return truck;
@@ -67,6 +70,7 @@ public sealed class Truck : AggregateRoot
 
     public void Update(
         string brand,
+        TruckType truckType,
         int modelYear,
         decimal capacityKg,
         decimal volumeM3,
@@ -77,7 +81,7 @@ public sealed class Truck : AggregateRoot
         EnsureNotDeleted();
         ValidateCapacities(capacityKg, volumeM3);
 
-        ApplyDetails(brand, modelYear, capacityKg, volumeM3, soatExpiresOn, techReviewExpiresOn);
+        ApplyDetails(brand, truckType, modelYear, capacityKg, volumeM3, soatExpiresOn, techReviewExpiresOn);
         UpdatedAt = utcNow;
     }
 
@@ -112,17 +116,25 @@ public sealed class Truck : AggregateRoot
 
         DeletedAt = utcNow;
         UpdatedAt = utcNow;
+        Raise(new TruckDeleted(Id));
     }
 
     private void ApplyDetails(
         string brand,
+        TruckType truckType,
         int modelYear,
         decimal capacityKg,
         decimal volumeM3,
         DateOnly soatExpiresOn,
         DateOnly techReviewExpiresOn)
     {
+        if (!Enum.IsDefined(truckType))
+        {
+            throw new DomainException("El tipo de camión no es válido.");
+        }
+
         Brand = brand;
+        TruckType = truckType;
         ModelYear = modelYear;
         CapacityKg = capacityKg;
         VolumeM3 = volumeM3;

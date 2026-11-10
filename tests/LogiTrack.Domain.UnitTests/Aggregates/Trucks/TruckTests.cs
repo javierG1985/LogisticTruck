@@ -11,17 +11,76 @@ public sealed class TruckTests
     private static readonly DateOnly TechReviewExpiresOn = new(2027, 6, 30);
 
     [Fact]
+    public void Register_WithTruckType_StoresTheType()
+    {
+        var truck = Truck.Register(
+            Plate.Create("ABC123"), "Kenworth", TruckType.Articulated, 2022, 8000m, 30m, SoatExpiresOn, TechReviewExpiresOn, Now);
+
+        Assert.Equal(TruckType.Articulated, truck.TruckType);
+    }
+
+    [Fact]
+    public void Register_WithUndefinedTruckType_ThrowsDomainException()
+    {
+        Assert.Throws<DomainException>(() => Truck.Register(
+            Plate.Create("ABC123"), "Kenworth", (TruckType)0, 2022, 8000m, 30m, SoatExpiresOn, TechReviewExpiresOn, Now));
+    }
+
+    [Fact]
+    public void Update_WithUndefinedTruckType_ThrowsDomainException()
+    {
+        var truck = CreateTruck();
+
+        Assert.Throws<DomainException>(() =>
+            truck.Update("Volvo FH", (TruckType)99, 2024, 9000m, 35m, SoatExpiresOn, TechReviewExpiresOn, Now));
+    }
+
+    [Fact]
+    public void Update_ChangesTheTruckType()
+    {
+        var truck = CreateTruck();
+
+        truck.Update("Volvo FH", TruckType.Light, 2024, 9000m, 35m, SoatExpiresOn, TechReviewExpiresOn, Now);
+
+        Assert.Equal(TruckType.Light, truck.TruckType);
+    }
+
+    [Fact]
+    public void Delete_RaisesTruckDeleted()
+    {
+        var truck = CreateTruck();
+        truck.ClearDomainEvents();
+
+        truck.Delete(Now);
+
+        var domainEvent = Assert.IsType<TruckDeleted>(Assert.Single(truck.DomainEvents));
+        Assert.Equal(truck.Id, domainEvent.TruckId);
+    }
+
+    [Fact]
+    public void Delete_CalledTwice_RaisesTruckDeletedOnce()
+    {
+        var truck = CreateTruck();
+        truck.ClearDomainEvents();
+
+        truck.Delete(Now);
+        truck.Delete(Now.AddHours(1));
+
+        Assert.Single(truck.DomainEvents);
+    }
+
+    [Fact]
     public void Register_WithZeroCapacity_ThrowsDomainException()
     {
         Assert.Throws<DomainException>(() => Truck.Register(
-            Plate.Create("ABC123"), "Kenworth", 2022, 0m, 30m, SoatExpiresOn, TechReviewExpiresOn, Now));
+            Plate.Create("ABC123"), "Kenworth", TruckType.Rigid, 2022, 0m, 30m, SoatExpiresOn, TechReviewExpiresOn, Now));
     }
 
     [Fact]
     public void Register_WithZeroVolume_ThrowsDomainException()
     {
         Assert.Throws<DomainException>(() => Truck.Register(
-            Plate.Create("ABC123"), "Kenworth", 2022, 8000m, 0m, SoatExpiresOn, TechReviewExpiresOn, Now));
+            Plate.Create("ABC123"), "Kenworth", TruckType.Rigid, 2022, 8000m, 0m, SoatExpiresOn, TechReviewExpiresOn, Now));
     }
 
     [Fact]
@@ -85,7 +144,7 @@ public sealed class TruckTests
         var truck = CreateTruck();
         truck.ClearDomainEvents();
 
-        truck.Update("Volvo FH", 2024, 9000m, 35m, SoatExpiresOn, TechReviewExpiresOn, Now);
+        truck.Update("Volvo FH", TruckType.Rigid, 2024, 9000m, 35m, SoatExpiresOn, TechReviewExpiresOn, Now);
 
         Assert.Equal("Volvo FH", truck.Brand);
         Assert.Equal(9000m, truck.CapacityKg);
@@ -98,7 +157,7 @@ public sealed class TruckTests
         var truck = CreateTruck();
 
         Assert.Throws<DomainException>(() =>
-            truck.Update("Volvo FH", 2024, 0m, 35m, SoatExpiresOn, TechReviewExpiresOn, Now));
+            truck.Update("Volvo FH", TruckType.Rigid, 2024, 0m, 35m, SoatExpiresOn, TechReviewExpiresOn, Now));
     }
 
     [Fact]
@@ -108,7 +167,7 @@ public sealed class TruckTests
         truck.Delete(Now);
 
         Assert.Throws<DomainException>(() =>
-            truck.Update("Volvo FH", 2024, 9000m, 35m, SoatExpiresOn, TechReviewExpiresOn, Now));
+            truck.Update("Volvo FH", TruckType.Rigid, 2024, 9000m, 35m, SoatExpiresOn, TechReviewExpiresOn, Now));
     }
 
     [Fact]
@@ -134,5 +193,5 @@ public sealed class TruckTests
     }
 
     private static Truck CreateTruck() =>
-        Truck.Register(Plate.Create("ABC123"), "Kenworth", 2022, 8000m, 30m, SoatExpiresOn, TechReviewExpiresOn, Now);
+        Truck.Register(Plate.Create("ABC123"), "Kenworth", TruckType.Rigid, 2022, 8000m, 30m, SoatExpiresOn, TechReviewExpiresOn, Now);
 }

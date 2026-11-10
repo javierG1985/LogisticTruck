@@ -12,6 +12,7 @@ public sealed class UpdateTruckHandler(IApplicationDbContext db, TimeProvider ti
 
         truck.Update(
             command.Brand,
+            command.TruckType,
             command.ModelYear,
             command.CapacityKg,
             command.VolumeM3,

@@ -23,6 +23,11 @@ public sealed class ListTrucksHandler(IApplicationDbContext db) : IQueryHandler<
             trucks = trucks.Where(truck => truck.Status == status);
         }
 
+        if (query.TruckType is { } truckType)
+        {
+            trucks = trucks.Where(truck => truck.TruckType == truckType);
+        }
+
         var totalCount = await trucks.CountAsync(cancellationToken);
 
         // EF no traduce Plate.Value en SQL, así que se proyectan las columnas y la placa se convierte en memoria.
@@ -34,6 +39,7 @@ public sealed class ListTrucksHandler(IApplicationDbContext db) : IQueryHandler<
                 truck.Id,
                 truck.Plate,
                 truck.Brand,
+                truck.TruckType,
                 truck.ModelYear,
                 truck.CapacityKg,
                 truck.Status,
@@ -41,7 +47,14 @@ public sealed class ListTrucksHandler(IApplicationDbContext db) : IQueryHandler<
             .ToListAsync(cancellationToken);
 
         var items = rows
-            .Select(row => new TruckListItem(row.Id, row.Plate.Value, row.Brand, row.ModelYear, row.CapacityKg, row.Status))
+            .Select(row => new TruckListItem(
+                row.Id,
+                row.Plate.Value,
+                row.Brand,
+                row.TruckType,
+                row.ModelYear,
+                row.CapacityKg,
+                row.Status))
             .ToList();
 
         return new PagedResult<TruckListItem>(items, query.Page, query.PageSize, totalCount);

@@ -1,3 +1,4 @@
+using LogiTrack.Domain.Aggregates.Trucks;
 using Mediator;
 
 namespace LogiTrack.Application.Features.Trucks.Commands.UpdateTruck;
@@ -8,6 +9,7 @@ public sealed record UpdateTruckCommand(
     Guid Id,
     uint ExpectedVersion,
     string Brand,
+    TruckType TruckType,
     int ModelYear,
     decimal CapacityKg,
     decimal VolumeM3,

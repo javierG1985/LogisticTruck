@@ -157,6 +157,12 @@ namespace LogiTrack.Infrastructure.Persistence.Migrations
                         .HasColumnType("date")
                         .HasColumnName("tech_review_expires_on");
 
+                    b.Property<string>("TruckType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("truck_type");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("updated_at");

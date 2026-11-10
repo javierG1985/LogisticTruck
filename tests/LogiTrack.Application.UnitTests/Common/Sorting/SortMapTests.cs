@@ -75,6 +75,6 @@ public sealed class SortMapTests
 
     private static Truck Truck(string plate, int modelYear) =>
         LogiTrack.Domain.Aggregates.Trucks.Truck.Register(
-            Plate.Create(plate), "Kenworth", modelYear, 8000m, 30m,
+            Plate.Create(plate), "Kenworth", TruckType.Rigid, modelYear, 8000m, 30m,
             new DateOnly(2027, 1, 31), new DateOnly(2027, 6, 30), Now);
 }

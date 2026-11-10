@@ -14,6 +14,7 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | Volumen | `VolumeM3` | Volumen de carga en metros cúbicos. Debe ser mayor que cero. |
 | Año modelo | `ModelYear` | Año de fabricación del modelo. Validado entre 1950 y 2100. |
 | Marca | `Brand` | Fabricante del camión. Máximo 60 caracteres. |
+| Tipo de camión | `TruckType` | Clasificación del vehículo: `Light` (liviano), `Rigid` (rígido) o `Articulated` (articulado). Guardado como texto. Obligatorio al registrar. |
 | Estado del camión | `TruckStatus` | Enumeración guardada como texto en la base de datos. |
 | Disponible | `TruckStatus.Available` | Estado inicial de un camión recién registrado. |
 | En ruta | `TruckStatus.InRoute` | El camión está en un viaje. No puede pasar a ruta desde `Maintenance`. |
@@ -55,6 +56,7 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | --- | --- | --- |
 | `TruckRegistered` | Se registra un camión nuevo. | `LogOnTruckRegistered` (registra el alta en el log). |
 | `TruckStatusChanged` | Cambia el estado de un camión. | `LogOnTruckStatusChanged` (registra el cambio en el log). |
+| `TruckDeleted` | Se da de baja un camión. | `LogOnTruckDeleted` (registra la baja en el log). Las asignaciones lo escucharán en el paso 6. |
 | `DriverRegistered` | Se registra un conductor nuevo. | Pendiente (se añade con la feature `Drivers`). |
 | `DriverStatusChanged` | Cambia el estado de un conductor. | Pendiente: `Assignments` libera la asignación en `OnLeave` o `Inactive` (paso 6). |
 | `DriverDeleted` | Se da de baja un conductor (borrado lógico). | Pendiente: `Assignments` libera la asignación (paso 6). |

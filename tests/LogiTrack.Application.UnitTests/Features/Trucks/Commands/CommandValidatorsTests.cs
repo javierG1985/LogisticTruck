@@ -53,7 +53,7 @@ public sealed class CommandValidatorsTests
     [Fact]
     public void UpdateTruckValidator_WithEmptyBrand_Fails()
     {
-        var command = new UpdateTruckCommand(Guid.NewGuid(), 1, string.Empty, 2022, 8000m, 30m, SoatExpiresOn, TechReviewExpiresOn);
+        var command = new UpdateTruckCommand(Guid.NewGuid(), 1, string.Empty, TruckType.Rigid, 2022, 8000m, 30m, SoatExpiresOn, TechReviewExpiresOn);
 
         var result = new UpdateTruckValidator().Validate(command);
 
@@ -71,5 +71,23 @@ public sealed class CommandValidatorsTests
     }
 
     private static CreateTruckCommand ValidCreateCommand() =>
-        new("ABC123", "Kenworth", 2022, 8000m, 30m, SoatExpiresOn, TechReviewExpiresOn);
+        new("ABC123", "Kenworth", TruckType.Rigid, 2022, 8000m, 30m, SoatExpiresOn, TechReviewExpiresOn);
+
+    [Fact]
+    public void CreateTruckValidator_WithUndefinedTruckType_ReportsTruckType()
+    {
+        var result = new CreateTruckValidator().Validate(ValidCreateCommand() with { TruckType = (TruckType)0 });
+
+        Assert.Contains(result.Errors, error => error.PropertyName == "TruckType");
+    }
+
+    [Fact]
+    public void UpdateTruckValidator_WithUndefinedTruckType_ReportsTruckType()
+    {
+        var command = new UpdateTruckCommand(Guid.NewGuid(), 1, "Kenworth", (TruckType)99, 2022, 8000m, 30m, SoatExpiresOn, TechReviewExpiresOn);
+
+        var result = new UpdateTruckValidator().Validate(command);
+
+        Assert.Contains(result.Errors, error => error.PropertyName == "TruckType");
+    }
 }

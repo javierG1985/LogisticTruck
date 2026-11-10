@@ -50,6 +50,7 @@ public sealed class TrucksSearchTests(ApiFactory factory) : IClassFixture<ApiFac
         {
             plate,
             brand,
+            truckType = "Rigid",
             modelYear = 2022,
             capacityKg = 8000,
             volumeM3 = 30,

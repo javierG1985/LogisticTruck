@@ -67,6 +67,7 @@ public sealed class TrucksController(ISender sender) : ControllerBase
             id,
             expectedVersion,
             request.Brand,
+            request.TruckType,
             request.ModelYear,
             request.CapacityKg,
             request.VolumeM3,

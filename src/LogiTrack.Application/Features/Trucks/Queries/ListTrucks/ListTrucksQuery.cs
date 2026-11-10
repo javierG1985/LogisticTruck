@@ -10,6 +10,8 @@ public sealed record ListTrucksQuery : PagedRequest, IQuery<PagedResult<TruckLis
 
     public TruckStatus? Status { get; init; }
 
+    public TruckType? TruckType { get; init; }
+
     // Formato: plate,-createdAt (el guion indica descendente).
     public string? Sort { get; init; }
 }

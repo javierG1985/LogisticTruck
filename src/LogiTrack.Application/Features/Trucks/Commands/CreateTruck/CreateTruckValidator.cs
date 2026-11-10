@@ -21,6 +21,11 @@ public sealed class CreateTruckValidator : AbstractValidator<CreateTruckCommand>
             .MaximumLength(60)
             .WithMessage("La marca no puede superar 60 caracteres.");
 
+        // Un valor fuera del enum (incluido el 0 de una petición sin tipo) se rechaza aquí, antes de llegar al agregado.
+        RuleFor(command => command.TruckType)
+            .IsInEnum()
+            .WithMessage("El tipo de camión debe ser Light, Rigid o Articulated.");
+
         RuleFor(command => command.ModelYear)
             .InclusiveBetween(1950, 2100)
             .WithMessage("El año modelo debe estar entre 1950 y 2100.");
