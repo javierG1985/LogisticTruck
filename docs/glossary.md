@@ -67,10 +67,10 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | Evento | Cuándo ocurre | Quién reacciona |
 | --- | --- | --- |
 | `TruckRegistered` | Se registra un camión nuevo. | `LogOnTruckRegistered` (registra el alta en el log). |
-| `TruckStatusChanged` | Cambia el estado de un camión. | `LogOnTruckStatusChanged` (registra el cambio en el log). |
-| `TruckDeleted` | Se da de baja un camión. | `LogOnTruckDeleted` (registra la baja en el log). Las asignaciones lo escucharán en el paso 6. |
+| `TruckStatusChanged` | Cambia el estado de un camión. | `LogOnTruckStatusChanged` (registra el cambio en el log). `ReleaseOnTruckStatusChanged` libera la asignación si el camión pasa a `Maintenance` o `Inactive`. |
+| `TruckDeleted` | Se da de baja un camión. | `LogOnTruckDeleted` (registra la baja en el log). `ReleaseOnTruckDeleted` libera la asignación. |
 | `DriverRegistered` | Se registra un conductor nuevo. | Pendiente (se añade con la feature `Drivers`). |
-| `DriverStatusChanged` | Cambia el estado de un conductor. | Pendiente: `Assignments` libera la asignación en `OnLeave` o `Inactive` (paso 6). |
-| `DriverDeleted` | Se da de baja un conductor (borrado lógico). | Pendiente: `Assignments` libera la asignación (paso 6). |
+| `DriverStatusChanged` | Cambia el estado de un conductor. | `ReleaseOnDriverStatusChanged` libera la asignación si el conductor pasa a `OnLeave` o `Inactive`. Volver a `Active` no restaura la asignación. |
+| `DriverDeleted` | Se da de baja un conductor (borrado lógico). | `ReleaseOnDriverDeleted` libera la asignación. |
 | `DriverAssigned` | Se inicia una asignación. | `LogOnDriverAssigned` (registra la asignación en el log). |
 | `AssignmentReleased` | Se libera una asignación, con su motivo. | `LogOnAssignmentReleased` (registra la liberación en el log). |
