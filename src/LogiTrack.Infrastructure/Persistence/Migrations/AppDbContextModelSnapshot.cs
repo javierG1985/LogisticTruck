@@ -23,6 +23,59 @@ namespace LogiTrack.Infrastructure.Persistence.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Assignments.TruckAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("assigned_at");
+
+                    b.Property<Guid>("DriverId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("driver_id");
+
+                    b.Property<string>("ReleaseReason")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("release_reason");
+
+                    b.Property<DateTime?>("ReleasedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("released_at");
+
+                    b.Property<Guid>("TruckId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("truck_id");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_truck_assignments");
+
+                    b.HasIndex("DriverId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_truck_assignments_active_driver_id")
+                        .HasFilter("released_at IS NULL");
+
+                    b.HasIndex("TruckId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_truck_assignments_active_truck_id")
+                        .HasFilter("released_at IS NULL");
+
+                    b.ToTable("truck_assignments", "fleet", t =>
+                        {
+                            t.HasCheckConstraint("ck_truck_assignments_release_consistent", "(released_at IS NULL) = (release_reason IS NULL)");
+                        });
+                });
+
             modelBuilder.Entity("LogiTrack.Domain.Aggregates.Drivers.Driver", b =>
                 {
                     b.Property<Guid>("Id")
@@ -191,6 +244,23 @@ namespace LogiTrack.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_trucks_volume_m3_positive", "volume_m3 > 0");
                         });
+                });
+
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Assignments.TruckAssignment", b =>
+                {
+                    b.HasOne("LogiTrack.Domain.Aggregates.Drivers.Driver", null)
+                        .WithMany()
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_truck_assignments_drivers_driver_id");
+
+                    b.HasOne("LogiTrack.Domain.Aggregates.Trucks.Truck", null)
+                        .WithMany()
+                        .HasForeignKey("TruckId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_truck_assignments_trucks_truck_id");
                 });
 
             modelBuilder.Entity("LogiTrack.Domain.Aggregates.Drivers.Driver", b =>

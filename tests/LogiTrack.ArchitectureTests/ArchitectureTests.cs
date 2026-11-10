@@ -171,6 +171,8 @@ public sealed class ArchitectureTests
         }
     }
 
+    private const string CrossAggregatePolicy = "TruckAssignmentPolicy";
+
     // Un agregado o una feature no puede depender de otro del mismo tipo: se comunican con eventos.
     private static void AssertNoCrossReferences(string marker)
     {
@@ -197,8 +199,10 @@ public sealed class ArchitectureTests
                     continue;
                 }
 
+                // TruckAssignmentPolicy es la única excepción: es la regla que combina camión y conductor, y vive en el agregado de asignaciones.
                 var result = Types.InAssembly(assembly)
                     .That().ResideInNamespaceStartingWith($"LogiTrack.{layer}.{marker}.{name}")
+                    .And().DoNotHaveName(CrossAggregatePolicy)
                     .ShouldNot().HaveDependencyOnAny(otherNamespaces)
                     .GetResult();
 

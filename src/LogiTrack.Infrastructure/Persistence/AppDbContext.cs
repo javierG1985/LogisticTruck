@@ -1,6 +1,7 @@
 using LogiTrack.Application.Common.Abstractions;
 using LogiTrack.Application.Common.Exceptions;
 using LogiTrack.Application.Common.Search;
+using LogiTrack.Domain.Aggregates.Assignments;
 using LogiTrack.Domain.Aggregates.Drivers;
 using LogiTrack.Domain.Aggregates.Trucks;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Truck> Trucks => Set<Truck>();
 
     public DbSet<Driver> Drivers => Set<Driver>();
+
+    public DbSet<TruckAssignment> TruckAssignments => Set<TruckAssignment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

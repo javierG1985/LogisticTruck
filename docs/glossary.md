@@ -50,6 +50,18 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | Cambio de estado (conductor) | `Driver.ChangeStatus(...)` | Registra `DriverStatusChanged` con el estado anterior y el nuevo. |
 | Renovar licencia | `Driver.RenewLicense(...)` | Reemplaza la licencia por una nueva validada con la fecha de nacimiento del conductor. |
 
+## Área Fleet: asignaciones
+
+| Término | Código | Definición |
+| --- | --- | --- |
+| Asignación | `TruckAssignment` | Vínculo entre un camión y un conductor. Solo guarda los ids de ambos. Las liberadas se conservan como historial. |
+| Asignación activa | `TruckAssignment.ReleasedAt` nulo | Una asignación sin liberar. Un camión y un conductor tienen como mucho una activa, garantizado por índices únicos parciales en PostgreSQL. |
+| Iniciar asignación | `TruckAssignment.Start(...)` | Crea la asignación y registra `DriverAssigned`. Requiere antes `TruckAssignmentPolicy.EnsureCanAssign`. |
+| Liberar asignación | `TruckAssignment.Release(reason, utcNow)` | Cierra la asignación con un motivo (`AssignmentReleaseReason`) y registra `AssignmentReleased`. |
+| Motivo de liberación | `AssignmentReleaseReason` | `Manual`, `TruckStatusChanged`, `TruckDeleted`, `DriverStatusChanged`, `DriverDeleted`. |
+| Política de asignación | `TruckAssignmentPolicy.EnsureCanAssign(truck, driver, today)` | Regla que combina camión y conductor: camión disponible, conductor activo, licencia vigente y categoría suficiente. Es la única excepción a la regla de no referenciar agregados entre sí. |
+| Categoría mínima por tipo | `TruckAssignmentPolicy.RequiredLicenseFor(TruckType)` | `Light` → C1, `Rigid` → C2, `Articulated` → C3. Pendiente de confirmar con la normativa. |
+
 ## Eventos de dominio
 
 | Evento | Cuándo ocurre | Quién reacciona |
@@ -60,3 +72,5 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | `DriverRegistered` | Se registra un conductor nuevo. | Pendiente (se añade con la feature `Drivers`). |
 | `DriverStatusChanged` | Cambia el estado de un conductor. | Pendiente: `Assignments` libera la asignación en `OnLeave` o `Inactive` (paso 6). |
 | `DriverDeleted` | Se da de baja un conductor (borrado lógico). | Pendiente: `Assignments` libera la asignación (paso 6). |
+| `DriverAssigned` | Se inicia una asignación. | `LogOnDriverAssigned` (registra la asignación en el log). |
+| `AssignmentReleased` | Se libera una asignación, con su motivo. | `LogOnAssignmentReleased` (registra la liberación en el log). |
