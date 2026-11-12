@@ -1,0 +1,45 @@
+<button
+  type="button"
+  class="gap-space-sm px-space-xs text-on-surface hover:bg-surface-container-high flex min-h-11 items-center rounded-lg transition-colors"
+  aria-haspopup="menu"
+  [attr.aria-expanded]="open()"
+  [attr.aria-controls]="menuId"
+  (click)="toggle()"
+>
+  <span class="hidden min-w-0 text-right md:block">
+    <span class="font-label-md text-label-md text-on-surface block leading-tight"
+      >Usuario de demostración</span
+    >
+    <span class="font-label-sm text-label-sm text-on-surface-variant block leading-tight"
+      >Sin sesión iniciada</span
+    >
+  </span>
+  <span class="bg-primary text-on-primary flex h-8 w-8 items-center justify-center rounded-full">
+    <lt-icon name="person" size="sm" />
+  </span>
+</button>
+
+@if (open()) {
+  <div
+    [id]="menuId"
+    role="menu"
+    class="mt-space-xs bg-surface-container-lowest p-space-xs shadow-soft-md absolute top-full right-0 z-50 flex w-56 flex-col gap-1 rounded-xl"
+  >
+    <button
+      type="button"
+      role="menuitem"
+      disabled
+      class="px-space-sm font-label-md text-label-md text-outline flex min-h-11 items-center justify-between rounded-lg text-left"
+    >
+      Mi perfil <span class="font-label-sm text-label-sm">Próximamente</span>
+    </button>
+    <button
+      type="button"
+      role="menuitem"
+      disabled
+      class="px-space-sm font-label-md text-label-md text-outline flex min-h-11 items-center justify-between rounded-lg text-left"
+    >
+      Cerrar sesión <span class="font-label-sm text-label-sm">Próximamente</span>
+    </button>
+  </div>
+}

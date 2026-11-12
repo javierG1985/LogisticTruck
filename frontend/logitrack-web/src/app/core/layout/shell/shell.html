@@ -1,0 +1,36 @@
+<a
+  href="#contenido"
+  class="focus:left-space-md focus:top-space-md focus:bg-primary focus:px-space-md focus:py-space-sm focus:text-on-primary sr-only focus:not-sr-only focus:fixed focus:z-[60] focus:rounded-lg"
+>
+  Saltar al contenido
+</a>
+
+<lt-sidebar
+  [collapsed]="collapsed()"
+  [mobileOpen]="mobileOpen()"
+  (navigated)="closeMobile()"
+  (closeRequested)="closeMobile()"
+  (toggleRequested)="toggleCollapsed()"
+/>
+
+@if (mobileOpen()) {
+  <button
+    type="button"
+    class="bg-primary/40 fixed inset-0 z-40 cursor-default lg:hidden"
+    aria-label="Cerrar menú"
+    (click)="closeMobile()"
+  ></button>
+}
+
+<div [class]="contentClasses()">
+  <lt-topbar (menuRequested)="openMobile()" />
+  <main
+    id="contenido"
+    tabindex="-1"
+    class="px-gutter py-space-md lg:px-gutter-desktop lg:py-space-lg w-full focus:outline-none"
+  >
+    <router-outlet />
+  </main>
+</div>
+
+<lt-notification-outlet />

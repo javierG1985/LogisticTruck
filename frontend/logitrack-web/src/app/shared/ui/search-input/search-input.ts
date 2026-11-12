@@ -16,6 +16,7 @@ let nextId = 0;
 export class SearchInput {
   readonly label = input.required<string>();
   readonly placeholder = input('');
+  readonly disabled = input(false);
   readonly value = model('');
 
   protected readonly inputId = `lt-search-${nextId++}`;

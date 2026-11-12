@@ -1,0 +1,95 @@
+<aside
+  id="navegacion"
+  [class]="panelClasses()"
+  aria-label="Navegación principal"
+  [cdkTrapFocus]="mobileOpen()"
+  [cdkTrapFocusAutoCapture]="mobileOpen()"
+>
+  <div class="gap-space-md flex flex-col">
+    <div class="gap-space-sm px-space-md flex items-center justify-between">
+      <div class="gap-space-sm flex items-center">
+        <div
+          class="bg-primary-container text-on-primary flex h-8 w-8 shrink-0 items-center justify-center rounded"
+        >
+          <lt-icon name="local_shipping" />
+        </div>
+        @if (!collapsed()) {
+          <div class="min-w-0">
+            <p class="font-headline text-headline-sm text-on-surface">LogiTrack</p>
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase">
+              Gestión de flota
+            </p>
+          </div>
+        }
+      </div>
+      <div class="lg:hidden">
+        <lt-icon-button icon="close" label="Cerrar menú" (click)="closeRequested.emit()" />
+      </div>
+    </div>
+
+    <nav aria-label="Menú de secciones">
+      @for (group of groups; track group.section) {
+        <div class="gap-space-xs px-space-sm pb-space-sm flex flex-col">
+          @if (!collapsed()) {
+            <p class="px-space-md font-label-sm text-label-sm text-on-surface-variant uppercase">
+              {{ group.section }}
+            </p>
+          }
+          <ul class="gap-space-xs flex flex-col">
+            @for (item of group.items; track item.label) {
+              <li>
+                @if (item.enabled && item.path) {
+                  <a
+                    [routerLink]="item.path"
+                    routerLinkActive="bg-primary text-on-primary shadow-soft"
+                    ariaCurrentWhenActive="page"
+                    [class]="
+                      linkBase +
+                      ' text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                    "
+                    [attr.title]="collapsed() ? item.label : null"
+                    (click)="navigated.emit()"
+                  >
+                    <lt-icon [name]="item.icon" />
+                    @if (collapsed()) {
+                      <span class="sr-only">{{ item.label }}</span>
+                    } @else {
+                      <span class="min-w-0 truncate">{{ item.label }}</span>
+                    }
+                  </a>
+                } @else {
+                  <span
+                    [class]="linkBase + ' text-outline'"
+                    [attr.title]="collapsed() ? item.label + ' (Próximamente)' : null"
+                    aria-disabled="true"
+                  >
+                    <lt-icon [name]="item.icon" />
+                    @if (collapsed()) {
+                      <span class="sr-only">{{ item.label }}, próximamente</span>
+                    } @else {
+                      <span class="min-w-0 truncate">{{ item.label }}</span>
+                      <lt-badge class="ml-auto shrink-0">Próximamente</lt-badge>
+                    }
+                  </span>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </nav>
+  </div>
+
+  <div class="gap-space-sm px-space-md flex flex-col">
+    <div class="hidden justify-end lg:flex">
+      <lt-icon-button
+        [icon]="collapsed() ? 'chevron_right' : 'chevron_left'"
+        [label]="collapsed() ? 'Expandir menú' : 'Contraer menú'"
+        (click)="toggleRequested.emit()"
+      />
+    </div>
+    @if (!collapsed()) {
+      <p class="font-label-sm text-label-sm text-outline text-center">LogiTrack v{{ version }}</p>
+    }
+  </div>
+</aside>

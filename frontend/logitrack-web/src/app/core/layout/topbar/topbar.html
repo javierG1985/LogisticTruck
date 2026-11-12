@@ -1,0 +1,37 @@
+<header
+  class="gap-space-sm bg-surface/80 px-gutter shadow-soft lg:px-gutter-desktop sticky top-0 z-20 flex h-16 items-center justify-between backdrop-blur-xl"
+>
+  <div class="gap-space-sm flex min-w-0 flex-1 items-center">
+    <span id="lt-menu-trigger" class="lg:hidden">
+      <lt-icon-button icon="menu" label="Abrir menú" (click)="menuRequested.emit()" />
+    </span>
+    <div class="hidden max-w-sm min-w-0 flex-1 sm:block">
+      <lt-search-input label="Buscar en LogiTrack" placeholder="Próximamente" [disabled]="true" />
+    </div>
+    <div class="sm:hidden">
+      <lt-icon-button icon="search" label="Buscar (próximamente)" [disabled]="true" />
+    </div>
+  </div>
+
+  <div class="gap-space-sm flex items-center">
+    <div class="hidden md:block">
+      <lt-segmented-control
+        label="Tema de la interfaz"
+        [options]="themeOptions"
+        [value]="theme.mode()"
+        (valueChange)="setTheme($event)"
+      />
+    </div>
+    <div class="md:hidden">
+      <lt-select-field
+        label="Tema"
+        [options]="themeOptions"
+        [value]="theme.mode()"
+        (valueChange)="setTheme($event)"
+      />
+    </div>
+    <lt-icon-button icon="notifications" label="Notificaciones (próximamente)" [disabled]="true" />
+    <div class="bg-surface-container-highest hidden h-6 w-px sm:block"></div>
+    <lt-user-menu />
+  </div>
+</header>
