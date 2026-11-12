@@ -1,0 +1,147 @@
+<div class="gap-space-xl flex flex-col">
+  <lt-section-header
+    title="Componentes"
+    subtitle="Todas las variantes y estados del kit de shared/ui."
+    icon="widgets"
+  />
+
+  <section aria-labelledby="gal-buttons" class="gap-space-sm flex flex-col">
+    <h3 id="gal-buttons" class="font-label-lg text-label-lg text-on-surface">Botón</h3>
+    <div class="gap-space-sm flex flex-wrap items-center">
+      @for (variant of buttonVariants; track variant) {
+        <lt-button [variant]="variant">{{ variant }}</lt-button>
+      }
+    </div>
+    <div class="gap-space-sm flex flex-wrap items-center">
+      <lt-button size="sm" icon="add_circle">Nuevo Despacho</lt-button>
+      <lt-button variant="accent" icon="cloud_sync">Importar órdenes</lt-button>
+      <lt-button [loading]="true">Guardando</lt-button>
+      <lt-button [disabled]="true">Deshabilitado</lt-button>
+    </div>
+    <div class="gap-space-sm flex flex-wrap items-center">
+      <lt-icon-button icon="notifications" label="Ver notificaciones" />
+      <lt-icon-button icon="filter_alt_off" label="Limpiar filtros" />
+      <lt-icon-button icon="delete" label="Eliminar (deshabilitado)" [disabled]="true" />
+    </div>
+  </section>
+
+  <section aria-labelledby="gal-badges" class="gap-space-sm flex flex-col">
+    <h3 id="gal-badges" class="font-label-lg text-label-lg text-on-surface">Badge</h3>
+    <div class="gap-space-sm flex flex-wrap items-center">
+      @for (variant of badgeVariants; track variant) {
+        <lt-badge [variant]="variant" [dot]="true">{{ variant }}</lt-badge>
+      }
+      <lt-badge variant="info" [dot]="true" [live]="true">En vivo</lt-badge>
+    </div>
+  </section>
+
+  <section aria-labelledby="gal-cards" class="gap-space-sm flex flex-col">
+    <h3 id="gal-cards" class="font-label-lg text-label-lg text-on-surface">
+      Tarjeta y encabezados
+    </h3>
+    <div class="gap-gutter-desktop grid md:grid-cols-2">
+      <lt-card>
+        <p class="font-body-md text-body-md text-on-surface">Padding md, contenido libre.</p>
+      </lt-card>
+      <lt-card padding="lg">
+        <p class="font-body-md text-body-md text-on-surface">Padding lg, contenido libre.</p>
+      </lt-card>
+    </div>
+    <lt-page-header
+      [breadcrumbs]="['Operación', 'Ejemplo']"
+      title="Encabezado de página"
+      badge="Ejemplo"
+    >
+      <lt-button actions variant="secondary" size="sm">Acción</lt-button>
+    </lt-page-header>
+    @for (tone of sectionTones; track tone) {
+      <lt-section-header
+        title="Órdenes por Asignar"
+        subtitle="Tono {{ tone }}"
+        icon="inventory_2"
+        [tone]="tone"
+      >
+        <lt-button actions variant="ghost" size="sm">Ver todas</lt-button>
+      </lt-section-header>
+    }
+  </section>
+
+  <section aria-labelledby="gal-kpi" class="gap-space-sm flex flex-col">
+    <h3 id="gal-kpi" class="font-label-lg text-label-lg text-on-surface">Indicadores</h3>
+    <div class="gap-gutter-desktop grid sm:grid-cols-2 xl:grid-cols-3">
+      @for (tone of kpiTones; track tone) {
+        <lt-kpi-card
+          label="Cubicaje optimizado"
+          value="94,2%"
+          supportText="Tono {{ tone }}"
+          [tone]="tone"
+          icon="view_in_ar"
+        />
+      }
+      <lt-kpi-card label="Sin datos" supportText="Estado vacío" />
+    </div>
+    <div class="gap-space-md grid md:grid-cols-2">
+      <lt-progress-bar label="Capacidad ocupada" [value]="85" supportText="2,4 / 2,8 t" />
+      <lt-progress-bar label="Capacidad vacía" [value]="0" />
+    </div>
+  </section>
+
+  <section aria-labelledby="gal-filters" class="gap-space-sm flex flex-col">
+    <h3 id="gal-filters" class="font-label-lg text-label-lg text-on-surface">Búsqueda y filtros</h3>
+    <lt-filter-bar>
+      <div search>
+        <lt-search-input
+          label="Buscar camiones"
+          placeholder="Filtrar por placa o marca"
+          [(value)]="searchTerm"
+        />
+      </div>
+      <div filters class="gap-space-sm flex flex-col @4xl:flex-row">
+        <lt-select-field label="Hub:" [options]="hubs" [(value)]="hub" />
+        <lt-segmented-control label="Vista" [options]="views" [(value)]="view" />
+      </div>
+    </lt-filter-bar>
+    <p class="font-label-sm text-label-sm text-on-surface-variant">
+      Texto buscado: "{{ searchTerm() }}" · Hub: {{ hub() }} · Vista: {{ view() }}
+    </p>
+    <lt-search-input label="Buscador deshabilitado" placeholder="Próximamente" [disabled]="true" />
+  </section>
+
+  <section aria-labelledby="gal-states" class="gap-space-sm flex flex-col">
+    <h3 id="gal-states" class="font-label-lg text-label-lg text-on-surface">Estados</h3>
+    <div class="gap-gutter-desktop grid md:grid-cols-2">
+      <lt-empty-state
+        icon="inbox"
+        title="Sin resultados"
+        description="Ajusta los filtros para ver más."
+      />
+      <lt-empty-state
+        icon="assignment_add"
+        title="Arrastra órdenes aquí"
+        description="Crea la hoja de ruta."
+        [dashed]="true"
+      />
+    </div>
+    <lt-skeleton [lines]="3" label="Cargando camiones" />
+    <lt-pagination [totalPages]="8" [totalCount]="156" [(page)]="page" />
+  </section>
+
+  <section aria-labelledby="gal-dialog" class="gap-space-sm flex flex-col">
+    <h3 id="gal-dialog" class="font-label-lg text-label-lg text-on-surface">Confirmación</h3>
+    <div class="gap-space-sm flex flex-wrap items-center">
+      <lt-button variant="danger" (click)="confirmOpen.set(true)">Dar de baja un camión</lt-button>
+      <p class="font-body-sm text-body-sm text-on-surface-variant" aria-live="polite">
+        {{ confirmResult() }}
+      </p>
+    </div>
+    <lt-confirm-dialog
+      title="Dar de baja el camión"
+      message="El camión dejará de aparecer en las consultas. Esta acción queda registrada."
+      confirmLabel="Dar de baja"
+      confirmVariant="danger"
+      [(open)]="confirmOpen"
+      (confirmed)="confirmResult.set('Confirmado: el camión se dio de baja (ejemplo).')"
+      (cancelled)="confirmResult.set('Cancelado: no se dio de baja nada.')"
+    />
+  </section>
+</div>

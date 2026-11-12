@@ -1,0 +1,21 @@
+<div class="gap-space-md flex flex-col">
+  <lt-section-header
+    title="Tipografía"
+    subtitle="Inter para texto y Plus Jakarta Sans para títulos. label-sm solo para etiquetas secundarias."
+    icon="text_fields"
+  />
+  <lt-card>
+    <dl class="divide-surface-container-high flex flex-col divide-y">
+      @for (sample of samples; track sample.name) {
+        <div
+          class="gap-space-xs py-space-sm md:gap-space-md grid md:grid-cols-[10rem_1fr] md:items-baseline"
+        >
+          <dt class="font-label-sm text-label-sm text-on-surface-variant">{{ sample.name }}</dt>
+          <dd>
+            <span [class]="sample.classes">{{ sample.text }}</span>
+          </dd>
+        </div>
+      }
+    </dl>
+  </lt-card>
+</div>

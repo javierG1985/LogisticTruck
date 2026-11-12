@@ -1,0 +1,45 @@
+<div class="gap-space-md flex flex-col">
+  <lt-section-header
+    title="Espaciado, radios y sombras"
+    subtitle="Nombres de Stitch. Las utilidades numéricas de Tailwind siguen disponibles."
+    icon="straighten"
+  />
+
+  <lt-card>
+    <h3 class="mb-space-sm font-headline text-headline-sm text-on-surface">Espaciado</h3>
+    <ul class="gap-space-sm flex flex-col">
+      @for (item of spacing; track item.name) {
+        <li class="gap-space-md flex items-center">
+          <span class="font-label-sm text-label-sm text-on-surface-variant w-36">{{
+            item.name
+          }}</span>
+          <span [class]="item.classes"></span>
+        </li>
+      }
+    </ul>
+  </lt-card>
+
+  <lt-card>
+    <h3 class="mb-space-sm font-headline text-headline-sm text-on-surface">Radios</h3>
+    <ul class="gap-space-md flex flex-wrap">
+      @for (item of shapes; track item.name) {
+        <li class="gap-space-xs flex flex-col items-center">
+          <span [class]="item.classes"></span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant">{{ item.name }}</span>
+        </li>
+      }
+    </ul>
+  </lt-card>
+
+  <lt-card>
+    <h3 class="mb-space-sm font-headline text-headline-sm text-on-surface">Sombras</h3>
+    <ul class="gap-space-md grid sm:grid-cols-2">
+      @for (item of shadows; track item.name) {
+        <li class="gap-space-xs flex flex-col">
+          <span [class]="item.classes"></span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant">{{ item.name }}</span>
+        </li>
+      }
+    </ul>
+  </lt-card>
+</div>

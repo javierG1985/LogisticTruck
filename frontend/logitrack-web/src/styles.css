@@ -105,7 +105,8 @@
   --lt-on-secondary-container: #dbe1ff;
   --lt-secondary-fixed: #dbe1ff;
   --lt-secondary-fixed-dim: #b4c5ff;
-  --lt-on-secondary-fixed-variant: #dbe1ff;
+  /* Texto sobre secondary-fixed, que sigue claro en oscuro. Con #dbe1ff el texto era invisible. */
+  --lt-on-secondary-fixed-variant: #003ea8;
 
   --lt-tertiary-fixed: #ffddb8;
   --lt-tertiary-fixed-dim: #ffb95f;

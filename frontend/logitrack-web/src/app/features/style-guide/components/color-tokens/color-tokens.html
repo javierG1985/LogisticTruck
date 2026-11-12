@@ -1,0 +1,64 @@
+<div class="gap-space-md flex flex-col">
+  <lt-section-header
+    title="Colores"
+    subtitle="Cada token existe en claro y en oscuro. Las plantillas usan el nombre, nunca un valor suelto."
+    icon="palette"
+  />
+
+  <lt-card>
+    <ul class="gap-space-sm grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+      @for (token of tokens; track token) {
+        <li class="gap-space-xs flex flex-col">
+          <span
+            class="shadow-soft h-12 rounded-lg"
+            [style.background-color]="swatchColor(token)"
+            aria-hidden="true"
+          ></span>
+          <span class="font-label-sm text-label-sm text-on-surface break-all">{{ token }}</span>
+        </li>
+      }
+    </ul>
+  </lt-card>
+
+  <lt-card>
+    <h3 class="mb-space-sm font-headline text-headline-sm text-on-surface">
+      Contraste de texto sobre fondo
+    </h3>
+    <p class="mb-space-md font-body-sm text-body-sm text-on-surface-variant">
+      Mínimo WCAG AA para texto normal: {{ minimum }}:1. Los valores son la razón de contraste
+      calculada sobre los tokens.
+    </p>
+    <div class="overflow-x-auto">
+      <table class="font-body-sm text-body-sm w-full min-w-[32rem] text-left">
+        <thead class="text-on-surface-variant">
+          <tr>
+            <th scope="col" class="py-space-xs pr-space-sm font-label-md text-label-md">Texto</th>
+            <th scope="col" class="py-space-xs pr-space-sm font-label-md text-label-md">Fondo</th>
+            <th scope="col" class="py-space-xs pr-space-sm font-label-md text-label-md">Claro</th>
+            <th scope="col" class="py-space-xs font-label-md text-label-md">Oscuro</th>
+          </tr>
+        </thead>
+        <tbody class="text-on-surface">
+          @for (pair of pairs; track pair.text + pair.background) {
+            <tr class="border-surface-container-high border-t">
+              <td class="py-space-xs pr-space-sm">{{ pair.text }}</td>
+              <td class="py-space-xs pr-space-sm">{{ pair.background }}</td>
+              <td class="py-space-xs pr-space-sm">
+                {{ pair.light }}:1
+                <span [class]="passes(pair.light) ? 'text-secondary' : 'text-error'">{{
+                  passes(pair.light) ? 'AA' : 'No cumple'
+                }}</span>
+              </td>
+              <td class="py-space-xs">
+                {{ pair.dark }}:1
+                <span [class]="passes(pair.dark) ? 'text-secondary' : 'text-error'">{{
+                  passes(pair.dark) ? 'AA' : 'No cumple'
+                }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </lt-card>
+</div>

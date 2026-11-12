@@ -1,0 +1,114 @@
+<div class="gap-space-lg flex flex-col">
+  <lt-page-header
+    [breadcrumbs]="['Operación', 'Despachos y Asignación']"
+    title="Despachos y Planificación de Carga"
+    badge="Ejemplo"
+  >
+    <lt-button actions variant="secondary" size="sm" icon="cloud_sync" [disabled]="true"
+      >Importar órdenes</lt-button
+    >
+    <lt-button actions size="sm" icon="add_circle" [disabled]="true">Nuevo despacho</lt-button>
+  </lt-page-header>
+
+  <p class="font-label-sm text-label-sm text-on-surface-variant">
+    Ejemplo con datos ficticios para comparar con el diseño de Stitch. Los botones están
+    deshabilitados porque la función aún no existe.
+  </p>
+
+  <lt-filter-bar>
+    <div search>
+      <lt-search-input
+        label="Filtrar despachos"
+        placeholder="Filtrar por N° despacho, cliente o placa"
+        [(value)]="searchTerm"
+      />
+    </div>
+    <div filters class="gap-space-sm flex flex-col @4xl:flex-row @4xl:items-center">
+      <lt-select-field label="Hub:" [options]="hubs" [(value)]="hub" />
+      <lt-segmented-control label="Vista del despacho" [options]="views" [(value)]="view" />
+    </div>
+  </lt-filter-bar>
+
+  <div class="gap-gutter-desktop grid grid-cols-1 xl:grid-cols-12 xl:items-start">
+    <div class="gap-space-md flex flex-col xl:col-span-5">
+      <lt-section-header
+        title="Órdenes por asignar"
+        subtitle="3 órdenes de ejemplo en depósito"
+        icon="inventory_2"
+      />
+      @for (order of orders; track order.id) {
+        <lt-card>
+          <div class="gap-space-sm flex flex-col">
+            <div class="gap-space-sm flex items-center justify-between">
+              <span class="font-telemetry-md text-telemetry-md text-on-surface font-bold">{{
+                order.id
+              }}</span>
+              <lt-badge [variant]="order.priorityTone" [dot]="true">{{ order.priority }}</lt-badge>
+            </div>
+            <h3 class="font-label-lg text-label-lg text-on-surface font-bold">
+              {{ order.client }}
+            </h3>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">{{ order.address }}</p>
+            <p class="font-label-sm text-label-sm text-on-surface-variant">
+              {{ order.weight }} · Ventana {{ order.window }}
+            </p>
+          </div>
+        </lt-card>
+      }
+    </div>
+
+    <div class="gap-space-md flex flex-col xl:col-span-7">
+      <lt-section-header
+        title="Hojas de ruta y vehículos activos"
+        subtitle="Ejemplo: 1 unidad en ruta"
+        icon="local_shipping"
+        tone="accent"
+      />
+      <lt-card>
+        <div class="gap-space-md flex flex-col">
+          <div class="gap-space-sm flex flex-wrap items-center justify-between">
+            <div class="flex flex-col">
+              <span class="font-headline text-headline-md text-on-surface"
+                >Camión {{ vehicle.plate }}</span
+              >
+              <span class="font-label-sm text-label-sm text-on-surface-variant">{{
+                vehicle.type
+              }}</span>
+            </div>
+            <lt-badge variant="info" [dot]="true" [live]="true">En ruta</lt-badge>
+          </div>
+          <p class="font-body-sm text-body-sm text-on-surface">
+            {{ vehicle.driver }} · Licencia {{ vehicle.license }} · {{ vehicle.city }}
+          </p>
+          <lt-progress-bar
+            label="Capacidad ocupada"
+            [value]="vehicle.capacity"
+            [supportText]="vehicle.load"
+          />
+        </div>
+      </lt-card>
+      <lt-empty-state
+        icon="assignment_add"
+        title="Arrastra órdenes aquí para crear la hoja de ruta"
+        description="Zona de ejemplo: el arrastre todavía no existe."
+        [dashed]="true"
+      >
+        <lt-button variant="accent" size="sm" [disabled]="true"
+          >Asignar conductor de turno</lt-button
+        >
+      </lt-empty-state>
+    </div>
+  </div>
+
+  <div class="gap-gutter-desktop grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+    @for (kpi of kpis; track kpi.label) {
+      <lt-kpi-card
+        [label]="kpi.label"
+        [value]="kpi.value"
+        [supportText]="kpi.support"
+        [tone]="kpi.tone"
+        [icon]="kpi.icon"
+      />
+    }
+  </div>
+</div>

@@ -59,7 +59,7 @@
                   </a>
                 } @else {
                   <span
-                    [class]="linkBase + ' text-outline'"
+                    [class]="linkBase + ' text-on-surface-variant'"
                     [attr.title]="collapsed() ? item.label + ' (Próximamente)' : null"
                     aria-disabled="true"
                   >
@@ -89,7 +89,9 @@
       />
     </div>
     @if (!collapsed()) {
-      <p class="font-label-sm text-label-sm text-outline text-center">LogiTrack v{{ version }}</p>
+      <p class="font-label-sm text-label-sm text-on-surface-variant text-center">
+        LogiTrack v{{ version }}
+      </p>
     }
   </div>
 </aside>

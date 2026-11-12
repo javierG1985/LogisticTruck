@@ -1,1 +1,19 @@
-<lt-page-header [breadcrumbs]="['Operación', 'Torre de Control']" title="Torre de Control" />
+<div class="gap-space-lg flex flex-col">
+  <lt-page-header [breadcrumbs]="['Operación', 'Torre de Control']" title="Torre de Control" />
+
+  <div class="gap-gutter-desktop grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+    @for (kpi of kpis; track kpi.label) {
+      <lt-kpi-card
+        [label]="kpi.label"
+        [icon]="kpi.icon"
+        supportText="Disponible cuando se conecten los datos de la flota"
+      />
+    }
+  </div>
+
+  <lt-empty-state
+    icon="monitoring"
+    title="La Torre de Control se llena con los datos de la flota"
+    description="Aquí verás los camiones disponibles, los conductores en turno, las asignaciones activas y los vencimientos próximos. Aparecerá en cuanto se conecten los datos."
+  />
+</div>
