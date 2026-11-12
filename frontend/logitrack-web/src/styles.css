@@ -1,3 +1,238 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/plus-jakarta-sans/600.css';
+@import '@fontsource/plus-jakarta-sans/700.css';
+@import 'material-symbols/outlined.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Colores de Stitch (roles de Material 3), modo claro. Son los valores exactos del diseño. */
+:root {
+  color-scheme: light;
+
+  --lt-background: #f7f9fb;
+  --lt-on-background: #191c1e;
+  --lt-surface: #f7f9fb;
+  --lt-on-surface: #191c1e;
+  --lt-surface-bright: #f7f9fb;
+  --lt-surface-dim: #d8dadc;
+  --lt-surface-variant: #e0e3e5;
+  --lt-on-surface-variant: #45464d;
+  --lt-surface-container-lowest: #ffffff;
+  --lt-surface-container-low: #f2f4f6;
+  --lt-surface-container: #eceef0;
+  --lt-surface-container-high: #e6e8ea;
+  --lt-surface-container-highest: #e0e3e5;
+  --lt-inverse-surface: #2d3133;
+  --lt-inverse-on-surface: #eff1f3;
+  --lt-outline: #76777d;
+  --lt-outline-variant: #c6c6cd;
+
+  --lt-primary: #000000;
+  --lt-on-primary: #ffffff;
+  --lt-primary-container: #131b2e;
+  --lt-on-primary-container: #7c839b;
+  --lt-primary-fixed: #dae2fd;
+  --lt-primary-fixed-dim: #bec6e0;
+  --lt-inverse-primary: #bec6e0;
+
+  --lt-secondary: #0051d5;
+  --lt-on-secondary: #ffffff;
+  --lt-secondary-container: #316bf3;
+  --lt-on-secondary-container: #fefcff;
+  --lt-secondary-fixed: #dbe1ff;
+  --lt-secondary-fixed-dim: #b4c5ff;
+  --lt-on-secondary-fixed-variant: #003ea8;
+
+  --lt-tertiary-fixed: #ffddb8;
+  --lt-tertiary-fixed-dim: #ffb95f;
+  /* Advertencias (vencimientos). Pendiente: contraste 3,56:1 sobre el fondo claro, por debajo de AA para texto. */
+  --lt-on-tertiary-container: #b87500;
+
+  --lt-error: #ba1a1a;
+  --lt-on-error: #ffffff;
+  --lt-error-container: #ffdad6;
+  --lt-on-error-container: #93000a;
+}
+
+/* Mismos nombres con valores oscuros. Los pares de texto y fondo cumplen AA salvo lo indicado en la advertencia. */
+.dark {
+  color-scheme: dark;
+
+  --lt-background: #101417;
+  --lt-on-background: #e0e3e5;
+  --lt-surface: #101417;
+  --lt-on-surface: #e0e3e5;
+  --lt-surface-bright: #36393d;
+  --lt-surface-dim: #101417;
+  --lt-surface-variant: #44474e;
+  --lt-on-surface-variant: #c6c6cd;
+  --lt-surface-container-lowest: #0b0f12;
+  --lt-surface-container-low: #181c20;
+  --lt-surface-container: #1c2024;
+  --lt-surface-container-high: #262a2e;
+  --lt-surface-container-highest: #31353a;
+  --lt-inverse-surface: #e0e3e5;
+  --lt-inverse-on-surface: #2d3133;
+  --lt-outline: #8f9097;
+  --lt-outline-variant: #45464d;
+
+  --lt-primary: #bec6e0;
+  --lt-on-primary: #283044;
+  --lt-primary-container: #2b3347;
+  --lt-on-primary-container: #dae2fd;
+  --lt-primary-fixed: #dae2fd;
+  --lt-primary-fixed-dim: #bec6e0;
+  --lt-inverse-primary: #000000;
+
+  --lt-secondary: #b4c5ff;
+  --lt-on-secondary: #002c71;
+  --lt-secondary-container: #0040aa;
+  --lt-on-secondary-container: #dbe1ff;
+  --lt-secondary-fixed: #dbe1ff;
+  --lt-secondary-fixed-dim: #b4c5ff;
+  --lt-on-secondary-fixed-variant: #dbe1ff;
+
+  --lt-tertiary-fixed: #ffddb8;
+  --lt-tertiary-fixed-dim: #ffb95f;
+  --lt-on-tertiary-container: #ffb95f;
+
+  --lt-error: #ffb4ab;
+  --lt-on-error: #690005;
+  --lt-error-container: #93000a;
+  --lt-on-error-container: #ffdad6;
+}
+
+@theme inline {
+  --color-background: var(--lt-background);
+  --color-on-background: var(--lt-on-background);
+  --color-surface: var(--lt-surface);
+  --color-on-surface: var(--lt-on-surface);
+  --color-surface-bright: var(--lt-surface-bright);
+  --color-surface-dim: var(--lt-surface-dim);
+  --color-surface-variant: var(--lt-surface-variant);
+  --color-on-surface-variant: var(--lt-on-surface-variant);
+  --color-surface-container-lowest: var(--lt-surface-container-lowest);
+  --color-surface-container-low: var(--lt-surface-container-low);
+  --color-surface-container: var(--lt-surface-container);
+  --color-surface-container-high: var(--lt-surface-container-high);
+  --color-surface-container-highest: var(--lt-surface-container-highest);
+  --color-inverse-surface: var(--lt-inverse-surface);
+  --color-inverse-on-surface: var(--lt-inverse-on-surface);
+  --color-outline: var(--lt-outline);
+  --color-outline-variant: var(--lt-outline-variant);
+
+  --color-primary: var(--lt-primary);
+  --color-on-primary: var(--lt-on-primary);
+  --color-primary-container: var(--lt-primary-container);
+  --color-on-primary-container: var(--lt-on-primary-container);
+  --color-primary-fixed: var(--lt-primary-fixed);
+  --color-primary-fixed-dim: var(--lt-primary-fixed-dim);
+  --color-inverse-primary: var(--lt-inverse-primary);
+
+  --color-secondary: var(--lt-secondary);
+  --color-on-secondary: var(--lt-on-secondary);
+  --color-secondary-container: var(--lt-secondary-container);
+  --color-on-secondary-container: var(--lt-on-secondary-container);
+  --color-secondary-fixed: var(--lt-secondary-fixed);
+  --color-secondary-fixed-dim: var(--lt-secondary-fixed-dim);
+  --color-on-secondary-fixed-variant: var(--lt-on-secondary-fixed-variant);
+
+  --color-tertiary-fixed: var(--lt-tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--lt-tertiary-fixed-dim);
+  --color-on-tertiary-container: var(--lt-on-tertiary-container);
+
+  --color-error: var(--lt-error);
+  --color-on-error: var(--lt-on-error);
+  --color-error-container: var(--lt-error-container);
+  --color-on-error-container: var(--lt-on-error-container);
+}
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-headline: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, sans-serif;
+
+  --text-headline-xl: 2.25rem;
+  --text-headline-xl--line-height: 2.75rem;
+  --text-headline-xl--letter-spacing: -0.02em;
+  --text-headline-xl--font-weight: 700;
+  --text-headline-lg: 1.75rem;
+  --text-headline-lg--line-height: 2.25rem;
+  --text-headline-lg--letter-spacing: -0.01em;
+  --text-headline-lg--font-weight: 700;
+  --text-headline-md: 1.25rem;
+  --text-headline-md--line-height: 1.75rem;
+  --text-headline-md--font-weight: 600;
+  --text-headline-sm: 1rem;
+  --text-headline-sm--line-height: 1.5rem;
+  --text-headline-sm--font-weight: 600;
+  --text-body-lg: 1rem;
+  --text-body-lg--line-height: 1.5rem;
+  --text-body-md: 0.875rem;
+  --text-body-md--line-height: 1.25rem;
+  --text-body-sm: 0.75rem;
+  --text-body-sm--line-height: 1rem;
+  --text-label-lg: 0.875rem;
+  --text-label-lg--line-height: 1.25rem;
+  --text-label-lg--letter-spacing: 0.01em;
+  --text-label-lg--font-weight: 600;
+  --text-label-md: 0.75rem;
+  --text-label-md--line-height: 1rem;
+  --text-label-md--letter-spacing: 0.02em;
+  --text-label-md--font-weight: 600;
+  --text-label-sm: 0.6875rem;
+  --text-label-sm--line-height: 0.875rem;
+  --text-label-sm--letter-spacing: 0.04em;
+  --text-label-sm--font-weight: 600;
+  --text-telemetry-lg: 1.5rem;
+  --text-telemetry-lg--line-height: 1.75rem;
+  --text-telemetry-lg--letter-spacing: -0.02em;
+  --text-telemetry-lg--font-weight: 700;
+  --text-telemetry-md: 1rem;
+  --text-telemetry-md--line-height: 1.25rem;
+  --text-telemetry-md--font-weight: 600;
+
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-xl: 2rem;
+  --spacing-gutter: 1rem;
+  --spacing-gutter-desktop: 1.5rem;
+
+  --radius-sm: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+
+  --shadow-soft: 0 1px 8px rgb(0 0 0 / 0.04);
+  --shadow-soft-md: 0 1px 8px rgb(0 0 0 / 0.08);
+}
+
+@layer base {
+  /* Foco visible en todo elemento interactivo; el color sale del tema claro u oscuro. */
+  :focus-visible {
+    outline: 2px solid var(--lt-secondary);
+    outline-offset: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-headline);
+  }
+}
+
+/* Quien pide menos movimiento no ve transiciones ni animaciones. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
