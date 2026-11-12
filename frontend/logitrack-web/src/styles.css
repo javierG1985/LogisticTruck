@@ -49,8 +49,8 @@
 
   --lt-tertiary-fixed: #ffddb8;
   --lt-tertiary-fixed-dim: #ffb95f;
-  /* Advertencias (vencimientos). Pendiente: contraste 3,56:1 sobre el fondo claro, por debajo de AA para texto. */
-  --lt-on-tertiary-container: #b87500;
+  /* Advertencias (vencimientos). Oscurecido desde #b87500 de Stitch: el original tenía 3,56:1 sobre el fondo claro, por debajo de AA para texto. */
+  --lt-on-tertiary-container: #966100;
 
   --lt-error: #ba1a1a;
   --lt-on-error: #ffffff;
