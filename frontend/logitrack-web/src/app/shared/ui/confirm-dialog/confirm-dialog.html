@@ -1,0 +1,10 @@
+<ng-template #content>
+  <div class="gap-space-md flex flex-col">
+    <h2 [id]="titleId" class="font-headline-md text-headline-md text-on-surface">{{ title() }}</h2>
+    <p class="font-body-md text-body-md text-on-surface-variant">{{ message() }}</p>
+    <div class="gap-space-sm flex flex-wrap justify-end">
+      <lt-button variant="secondary" (click)="cancel()">{{ cancelLabel() }}</lt-button>
+      <lt-button [variant]="confirmVariant()" (click)="confirm()">{{ confirmLabel() }}</lt-button>
+    </div>
+  </div>
+</ng-template>

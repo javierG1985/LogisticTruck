@@ -1,0 +1,13 @@
+<button
+  [class]="classes()"
+  [attr.type]="type()"
+  [disabled]="disabled() || loading()"
+  [attr.aria-busy]="loading() || null"
+>
+  @if (loading()) {
+    <lt-icon name="progress_activity" size="sm" class="motion-safe:animate-spin" />
+  } @else if (icon(); as name) {
+    <lt-icon [name]="name" size="sm" />
+  }
+  <span><ng-content /></span>
+</button>

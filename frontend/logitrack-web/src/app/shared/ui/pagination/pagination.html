@@ -1,0 +1,42 @@
+<nav aria-label="Paginación" class="gap-space-sm flex flex-wrap items-center justify-between">
+  @if (totalCount(); as total) {
+    <span class="font-label-sm text-label-sm text-on-surface-variant">{{ total }} resultados</span>
+  }
+  <div class="gap-space-xs flex items-center">
+    <lt-button
+      variant="secondary"
+      size="sm"
+      icon="chevron_left"
+      [disabled]="page() <= 1"
+      (click)="go(page() - 1)"
+    >
+      Anterior
+    </lt-button>
+    <span class="font-label-md text-label-md text-on-surface-variant @md:hidden">
+      Página {{ page() }} de {{ totalPages() }}
+    </span>
+    <ol class="hidden items-center gap-1 @md:flex">
+      @for (page of visiblePages(); track page) {
+        <li>
+          <button
+            type="button"
+            [class]="pageClasses(page)"
+            [attr.aria-label]="'Página ' + page"
+            [attr.aria-current]="page === this.page() ? 'page' : null"
+            (click)="go(page)"
+          >
+            {{ page }}
+          </button>
+        </li>
+      }
+    </ol>
+    <lt-button
+      variant="secondary"
+      size="sm"
+      [disabled]="page() >= totalPages()"
+      (click)="go(page() + 1)"
+    >
+      Siguiente
+    </lt-button>
+  </div>
+</nav>

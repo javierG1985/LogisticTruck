@@ -1,0 +1,21 @@
+<div
+  role="radiogroup"
+  [attr.aria-label]="label()"
+  class="bg-surface-container inline-flex gap-1 rounded-lg p-1"
+>
+  @for (option of options(); track option.value) {
+    <label
+      class="px-space-sm font-label-md text-label-md text-on-surface-variant hover:text-on-surface has-[:checked]:bg-primary has-[:checked]:text-on-primary has-focus-visible:outline-secondary inline-flex min-h-11 cursor-pointer items-center rounded-md transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2"
+    >
+      <input
+        type="radio"
+        class="sr-only"
+        [name]="groupName"
+        [value]="option.value"
+        [checked]="option.value === value()"
+        (change)="value.set(option.value)"
+      />
+      {{ option.label }}
+    </label>
+  }
+</div>

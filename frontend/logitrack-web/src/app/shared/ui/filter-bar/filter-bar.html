@@ -1,0 +1,26 @@
+<div
+  class="gap-space-sm bg-surface-container-lowest p-space-md shadow-soft flex flex-col rounded-xl"
+>
+  <div class="gap-space-sm flex items-center">
+    <div class="min-w-0 flex-1">
+      <ng-content select="[search]" />
+    </div>
+    <button
+      type="button"
+      class="bg-surface-container text-on-surface-variant hover:text-on-surface inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg @4xl:hidden"
+      [attr.aria-expanded]="expanded()"
+      [attr.aria-controls]="panelId"
+      [attr.aria-label]="expanded() ? 'Ocultar filtros' : 'Mostrar filtros'"
+      (click)="toggle()"
+    >
+      <lt-icon [name]="expanded() ? 'filter_alt_off' : 'filter_list'" />
+    </button>
+  </div>
+  <div
+    [id]="panelId"
+    class="gap-space-sm flex flex-col @4xl:flex @4xl:flex-row @4xl:flex-wrap @4xl:items-center"
+    [class.hidden]="!expanded()"
+  >
+    <ng-content select="[filters]" />
+  </div>
+</div>

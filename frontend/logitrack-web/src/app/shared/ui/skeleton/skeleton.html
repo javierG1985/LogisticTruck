@@ -1,0 +1,9 @@
+<div role="status" aria-busy="true" class="gap-space-sm flex flex-col">
+  <span class="sr-only">{{ label() }}</span>
+  @for (row of rows(); track row; let last = $last) {
+    <div
+      class="bg-surface-container-high h-4 rounded motion-safe:animate-pulse"
+      [style.width.%]="last ? 60 : 100"
+    ></div>
+  }
+</div>

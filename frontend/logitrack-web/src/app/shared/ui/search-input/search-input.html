@@ -1,0 +1,25 @@
+<div class="relative w-full">
+  <label [for]="inputId" class="sr-only">{{ label() }}</label>
+  <lt-icon
+    name="search"
+    size="md"
+    class="left-space-sm text-outline pointer-events-none absolute top-1/2 -translate-y-1/2"
+  />
+  <input
+    [id]="inputId"
+    type="text"
+    autocomplete="off"
+    [placeholder]="placeholder()"
+    [value]="value()"
+    (input)="onInput($event)"
+    class="bg-surface-container-lowest py-space-sm text-body-lg text-on-surface placeholder:text-outline focus-visible:ring-secondary @md:text-body-md min-h-11 w-full rounded-lg pr-10 pl-10 focus:outline-none focus-visible:ring-2"
+  />
+  @if (value()) {
+    <lt-icon-button
+      class="right-space-xs absolute top-1/2 -translate-y-1/2"
+      icon="close"
+      [label]="'Limpiar búsqueda'"
+      (click)="clear()"
+    />
+  }
+</div>

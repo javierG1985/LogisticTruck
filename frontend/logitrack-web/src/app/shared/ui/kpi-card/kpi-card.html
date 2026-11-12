@@ -1,0 +1,27 @@
+<div
+  class="gap-space-md bg-surface-container-lowest p-space-md shadow-soft flex items-center justify-between rounded-xl"
+>
+  <div class="flex min-w-0 flex-col">
+    <span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">{{
+      label()
+    }}</span>
+    @if (value(); as text) {
+      <span class="font-telemetry-lg text-telemetry-lg text-on-surface mt-0.5">{{ text }}</span>
+    } @else {
+      <span class="font-telemetry-lg text-telemetry-lg text-outline mt-0.5">
+        <span aria-hidden="true">—</span>
+        <span class="sr-only">Sin datos</span>
+      </span>
+    }
+    @if (supportText(); as text) {
+      <span [class]="supportClasses()">{{ text }}</span>
+    }
+  </div>
+  @if (icon(); as name) {
+    <div
+      class="bg-surface-container text-secondary flex h-12 w-12 shrink-0 items-center justify-center rounded-lg"
+    >
+      <lt-icon [name]="name" size="lg" />
+    </div>
+  }
+</div>

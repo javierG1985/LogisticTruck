@@ -1,0 +1,16 @@
+<div class="gap-space-md flex flex-col @md:flex-row @md:items-center @md:justify-between">
+  <div class="gap-space-sm flex items-center">
+    @if (icon(); as name) {
+      <div [class]="tileClasses()">
+        <lt-icon [name]="name" />
+      </div>
+    }
+    <div>
+      <h2 class="font-headline-sm text-headline-sm text-on-surface">{{ title() }}</h2>
+      @if (subtitle(); as text) {
+        <p class="font-label-sm text-label-sm text-on-surface-variant">{{ text }}</p>
+      }
+    </div>
+  </div>
+  <ng-content select="[actions]" />
+</div>

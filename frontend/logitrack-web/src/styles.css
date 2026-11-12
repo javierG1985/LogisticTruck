@@ -6,6 +6,7 @@
 @import '@fontsource/plus-jakarta-sans/600.css';
 @import '@fontsource/plus-jakarta-sans/700.css';
 @import 'material-symbols/outlined.css';
+@import '@angular/cdk/overlay-prebuilt.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 

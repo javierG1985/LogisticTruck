@@ -1,0 +1,36 @@
+<div class="gap-space-md flex flex-col @md:flex-row @md:items-end @md:justify-between">
+  <div class="gap-space-xs flex min-w-0 flex-col">
+    @if (breadcrumbs().length) {
+      <nav aria-label="Migas de pan">
+        <ol
+          class="gap-space-xs font-label-sm text-label-sm text-on-surface-variant flex flex-wrap items-center tracking-wider uppercase"
+        >
+          @for (crumb of breadcrumbs(); track $index; let last = $last) {
+            <li
+              class="gap-space-xs flex items-center"
+              [class.font-bold]="last"
+              [class.text-secondary]="last"
+              [attr.aria-current]="last ? 'page' : null"
+            >
+              <span>{{ crumb }}</span>
+              @if (!last) {
+                <lt-icon name="chevron_right" size="sm" />
+              }
+            </li>
+          }
+        </ol>
+      </nav>
+    }
+    <div class="gap-space-md flex flex-wrap items-baseline">
+      <h1 class="font-headline text-headline-xl-mobile text-on-surface @md:text-headline-xl">
+        {{ title() }}
+      </h1>
+      @if (badge(); as text) {
+        <lt-badge variant="info" [dot]="true">{{ text }}</lt-badge>
+      }
+    </div>
+  </div>
+  <div class="gap-space-sm flex flex-wrap items-center">
+    <ng-content select="[actions]" />
+  </div>
+</div>
