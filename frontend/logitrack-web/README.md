@@ -1,59 +1,70 @@
-# LogitrackWeb
+# LogiTrack Web
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.7.
+Frontend de LogiTrack, la plataforma de logística para transportadoras colombianas. Esta fase construye la base: arquitectura, sistema de diseño, kit de componentes y estructura de la app. Las pantallas de negocio llegan en fases posteriores.
 
-## Development server
+## Requisitos
 
-To start a local development server, run:
+- **Node.js 22.22.3 o superior.** La CLI de Angular 22 no arranca con versiones anteriores.
+- **npm** (incluido con Node).
+- El **backend** (`workspace/backend/LogiTrack`) para las pantallas con datos.
 
-```bash
-ng serve
-```
+## Cómo levantar la app
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Desde `workspace/frontend/logitrack-web`:
 
 ```bash
-ng generate component component-name
+npm install
 ```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+Abre `http://localhost:4200`. La Torre de Control y la guía de estilo funcionan sin el backend.
 
-To build the project run:
+Para las pantallas con datos, levanta primero el backend (PostgreSQL con `docker compose up -d` y `dotnet run --project src/LogiTrack.Api` desde `workspace/backend/LogiTrack`).
 
-```bash
-ng build
+## Scripts
+
+| Comando                | Qué hace                                                   |
+| ---------------------- | ---------------------------------------------------------- |
+| `npm start`            | Servidor de desarrollo con recarga automática              |
+| `npm run build`        | Build de producción en `dist/`                             |
+| `npm test`             | Pruebas unitarias con Vitest                               |
+| `npm run lint`         | ESLint, incluidas las reglas de dependencia entre carpetas |
+| `npm run format`       | Prettier: da formato a todo el proyecto                    |
+| `npm run format:check` | Prettier en modo verificación, sin cambiar archivos        |
+
+## Proxy hacia el backend
+
+En desarrollo, `proxy.conf.json` redirige todas las peticiones a `/api` hacia `http://localhost:5044`, el puerto del perfil `http` del backend.
+
+Así el navegador habla con el mismo origen que la app (`localhost:4200`) y no hace falta configurar CORS en desarrollo. Cuando exista el gateway, el proxy apuntará a él y el código de la app no cambia: la URL base sigue siendo `/api`, y lo que cambia es a dónde se reenvía.
+
+## Guía de estilo
+
+Con la app en marcha, abre `http://localhost:4200/style-guide`. Solo existe fuera de producción y muestra:
+
+- Los colores con su nombre y la tabla de contraste AA en claro y en oscuro.
+- La escala tipográfica, espaciados, radios y sombras.
+- Todos los componentes de `shared/ui` con sus variantes y estados.
+- La composición de ejemplo de la pantalla "Despachos y Asignación", con datos ficticios marcados como "Ejemplo".
+
+El diseño de referencia (Stitch) está en `docs/design/stitch/despachos-y-asignacion.html`. Las decisiones de diseño están en `docs/design/design-system.md`.
+
+## Estructura
+
+```text
+src/app/
+├─ core/       layout, navegación, tema, notificaciones, interceptores, configuración
+├─ shared/     kit de UI (shared/ui) y modelos genéricos
+└─ features/   dashboard (Torre de Control) y style-guide
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Las reglas de dependencia entre estas carpetas están en [CLAUDE.md](CLAUDE.md) y en `eslint.config.js`.
 
-## Running unit tests
+## Documentación
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- [CLAUDE.md](CLAUDE.md): convenciones y reglas, para cualquier persona o sesión que cambie el código.
+- [docs/design/design-system.md](docs/design/design-system.md): sistema de diseño, tokens y decisiones respecto a Stitch.
+- [docs/adr/0001-arquitectura-por-features.md](docs/adr/0001-arquitectura-por-features.md): por qué la app está organizada por features.
