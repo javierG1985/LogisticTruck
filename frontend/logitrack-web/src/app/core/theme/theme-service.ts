@@ -20,7 +20,8 @@ function readStoredMode(): ThemeMode {
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly document = inject(DOCUMENT);
-  private readonly media = this.document.defaultView?.matchMedia(DARK_QUERY) ?? null;
+  // matchMedia puede no existir (entornos sin navegador completo); en ese caso se asume modo claro.
+  private readonly media = this.document.defaultView?.matchMedia?.(DARK_QUERY) ?? null;
 
   readonly mode = signal<ThemeMode>(readStoredMode());
   private readonly systemPrefersDark = signal(this.media?.matches ?? false);
