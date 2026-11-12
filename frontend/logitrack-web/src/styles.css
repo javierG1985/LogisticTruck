@@ -56,6 +56,16 @@
   --lt-on-error: #ffffff;
   --lt-error-container: #ffdad6;
   --lt-on-error-container: #93000a;
+
+  --lt-tertiary: #000000;
+  --lt-on-tertiary: #ffffff;
+  --lt-tertiary-container: #2a1700;
+  --lt-on-tertiary-fixed: #2a1700;
+  --lt-on-tertiary-fixed-variant: #653e00;
+  --lt-on-secondary-fixed: #00174b;
+  --lt-on-primary-fixed: #131b2e;
+  --lt-on-primary-fixed-variant: #3f465c;
+  --lt-surface-tint: #565e74;
 }
 
 /* Mismos nombres con valores oscuros. Los pares de texto y fondo cumplen AA salvo lo indicado en la advertencia. */
@@ -104,6 +114,16 @@
   --lt-on-error: #690005;
   --lt-error-container: #93000a;
   --lt-on-error-container: #ffdad6;
+
+  --lt-tertiary: #ffddb8;
+  --lt-on-tertiary: #2a1700;
+  --lt-tertiary-container: #653e00;
+  --lt-on-tertiary-fixed: #2a1700;
+  --lt-on-tertiary-fixed-variant: #653e00;
+  --lt-on-secondary-fixed: #00174b;
+  --lt-on-primary-fixed: #131b2e;
+  --lt-on-primary-fixed-variant: #3f465c;
+  --lt-surface-tint: #bec6e0;
 }
 
 @theme inline {
@@ -149,6 +169,16 @@
   --color-on-error: var(--lt-on-error);
   --color-error-container: var(--lt-error-container);
   --color-on-error-container: var(--lt-on-error-container);
+
+  --color-tertiary: var(--lt-tertiary);
+  --color-on-tertiary: var(--lt-on-tertiary);
+  --color-tertiary-container: var(--lt-tertiary-container);
+  --color-on-tertiary-fixed: var(--lt-on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--lt-on-tertiary-fixed-variant);
+  --color-on-secondary-fixed: var(--lt-on-secondary-fixed);
+  --color-on-primary-fixed: var(--lt-on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--lt-on-primary-fixed-variant);
+  --color-surface-tint: var(--lt-surface-tint);
 }
 
 @theme {
@@ -169,6 +199,13 @@
   --text-headline-sm: 1rem;
   --text-headline-sm--line-height: 1.5rem;
   --text-headline-sm--font-weight: 600;
+  --text-headline-xl-mobile: 1.75rem;
+  --text-headline-xl-mobile--line-height: 2.25rem;
+  --text-headline-xl-mobile--letter-spacing: -0.01em;
+  --text-headline-xl-mobile--font-weight: 700;
+  --text-headline-lg-mobile: 1.375rem;
+  --text-headline-lg-mobile--line-height: 1.75rem;
+  --text-headline-lg-mobile--font-weight: 700;
   --text-body-lg: 1rem;
   --text-body-lg--line-height: 1.5rem;
   --text-body-md: 0.875rem;
@@ -202,6 +239,8 @@
   --spacing-space-xl: 2rem;
   --spacing-gutter: 1rem;
   --spacing-gutter-desktop: 1.5rem;
+  --spacing-margin: 1rem;
+  --spacing-margin-desktop: 2rem;
 
   --radius-sm: 0.125rem;
   --radius-lg: 0.25rem;
