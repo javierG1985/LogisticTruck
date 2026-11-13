@@ -2,12 +2,14 @@ using LogiTrack.Domain.SharedKernel;
 
 namespace LogiTrack.Domain.Aggregates.Drivers;
 
-// Licencia de servicio público. Vigencia: Ley 769 de 2002, art. 22, modificado por el Decreto 019 de 2012, art. 197:
-// 3 años si el conductor tenía menos de 60 años al expedirla; 1 año si tenía 60 o más.
+// Licencia de servicio público (categorías C). Vigencia de 3 años; 1 año si el conductor tenía 60 años o más al expedirla.
+// Fuente: tabla de categorías de licencia pegada por el usuario (no es el texto oficial). La regla usa la edad al expedir, no la actual.
 // Un DriverLicense existente siempre cumple esa vigencia: no hay licencias inválidas en memoria.
 public sealed record DriverLicense
 {
     private const int AgeThresholdForShortTerm = 60;
+
+    public const int ExpiringSoonWindowDays = 60;
 
     private DriverLicense(LicenseCategory category, DateOnly issuedOn, DateOnly expiresOn)
     {
@@ -46,6 +48,21 @@ public sealed record DriverLicense
     }
 
     public bool IsValidOn(DateOnly date) => date >= IssuedOn && date <= ExpiresOn;
+
+    public LicenseStatus StatusOn(DateOnly today) => StatusFor(ExpiresOn, today);
+
+    // Alerta de vencimiento: "próxima a vencer" cuando faltan ExpiringSoonWindowDays días o menos (incluido el día de vencimiento).
+    public static LicenseStatus StatusFor(DateOnly expiresOn, DateOnly today)
+    {
+        if (today > expiresOn)
+        {
+            return LicenseStatus.Expired;
+        }
+
+        return expiresOn.DayNumber - today.DayNumber <= ExpiringSoonWindowDays
+            ? LicenseStatus.ExpiringSoon
+            : LicenseStatus.Valid;
+    }
 
     // Una categoría superior habilita las inferiores (Resolución 1500 de 2005, art. 5, parágrafo 1).
     public bool Allows(LicenseCategory requiredCategory) => Category >= requiredCategory;

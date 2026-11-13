@@ -42,7 +42,8 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | Fecha de expedición | `DriverLicense.IssuedOn` | Fecha en que se expidió la licencia (`DateOnly`). |
 | Fecha de vencimiento | `DriverLicense.ExpiresOn` | Último día en que la licencia es válida (`DateOnly`). |
 | Categoría de licencia | `LicenseCategory` | Enumeración ordenada `C1 < C2 < C3`. Solo categorías de servicio público: las categorías B (servicio particular) no se aceptan. Norma: Resolución 1500 de 2005, art. 5. Una categoría superior habilita las inferiores (art. 5, parágrafo 1). |
-| Vigencia de la licencia | `DriverLicense.IsValidOn(date)` | Válida entre `IssuedOn` y `ExpiresOn`, ambos incluidos. Plazo máximo: 3 años si el conductor tenía menos de 60 años al expedirla, 1 año si tenía 60 o más. Norma: Ley 769 de 2002, art. 22, modificado por el Decreto 019 de 2012, art. 197. |
+| Vigencia de la licencia | `DriverLicense.IsValidOn(date)` | Válida entre `IssuedOn` y `ExpiresOn`, ambos incluidos. Plazo máximo para licencias de servicio público (C): 3 años; 1 año si el conductor tenía 60 años o más al expedirla. La edad se mide al expedir, no la actual. Referencia: tabla de categorías pegada por el usuario, no el texto oficial. |
+| Estado de la licencia | `DriverLicense.StatusOn(today)` y `DriverLicense.StatusFor(expiresOn, today)` | Calculado, no guardado. `Valid`: faltan más de 60 días. `ExpiringSoon`: faltan 60 días o menos, incluido el día de vencimiento. `Expired`: ya venció. Igual para C1, C2 y C3. "Hoy" es la fecha en Colombia (`ColombiaCalendar.TodayIn`, America/Bogota). Viaja en el detalle y en el listado de conductores como `licenseStatus`. |
 | Habilita tipo de camión | `DriverLicense.Allows(LicenseCategory)` | Indica si la categoría de la licencia basta para una categoría mínima exigida. No conoce `TruckType`: las reglas entre agregados viven en `TruckAssignmentPolicy`. |
 | Estado del conductor | `DriverStatus` | `Active` (activo), `OnLeave` (vacaciones, incapacidad o licencia) e `Inactive` (retirado de la empresa). |
 | Dado de baja (conductor) | `Driver.DeletedAt` distinto de nulo | Borrado lógico. Un conductor dado de baja no se modifica. |
@@ -60,7 +61,7 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | Liberar asignación | `TruckAssignment.Release(reason, utcNow)` | Cierra la asignación con un motivo (`AssignmentReleaseReason`) y registra `AssignmentReleased`. |
 | Motivo de liberación | `AssignmentReleaseReason` | `Manual`, `TruckStatusChanged`, `TruckDeleted`, `DriverStatusChanged`, `DriverDeleted`. |
 | Política de asignación | `TruckAssignmentPolicy.EnsureCanAssign(truck, driver, today)` | Regla que combina camión y conductor: camión disponible, conductor activo, licencia vigente y categoría suficiente. Es la única excepción a la regla de no referenciar agregados entre sí. |
-| Categoría mínima por tipo | `TruckAssignmentPolicy.RequiredLicenseFor(TruckType)` | `Light` → C1, `Rigid` → C2, `Articulated` → C3. Pendiente de confirmar con la normativa. |
+| Categoría mínima por tipo | `TruckAssignmentPolicy.RequiredLicenseFor(TruckType)` | `Light` → C1, `Rigid` → C2, `Articulated` → C3. Vehículos de servicio público de la empresa: C1 automóviles, camperos, camionetas y microbuses; C2 camiones rígidos, busetas y buses; C3 articulados. |
 
 ## Eventos de dominio
 

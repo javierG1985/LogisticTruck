@@ -1,3 +1,4 @@
+using LogiTrack.Application.Common.Time;
 using LogiTrack.Application.Common.Abstractions;
 using LogiTrack.Application.Common.Exceptions;
 using LogiTrack.Domain.Aggregates.Drivers;
@@ -40,6 +41,6 @@ public sealed class CreateDriverHandler(IApplicationDbContext db, TimeProvider t
         db.Drivers.Add(driver);
         await db.SaveChangesAsync(cancellationToken);
 
-        return DriverDetailsResponse.From(driver);
+        return DriverDetailsResponse.From(driver, ColombiaCalendar.TodayIn(timeProvider));
     }
 }

@@ -16,12 +16,13 @@ public sealed record DriverDetailsResponse(
     LicenseCategory LicenseCategory,
     DateOnly LicenseIssuedOn,
     DateOnly LicenseExpiresOn,
+    LicenseStatus LicenseStatus,
     DriverStatus Status,
     DateTime CreatedAt,
     DateTime UpdatedAt,
     uint Version)
 {
-    public static DriverDetailsResponse From(Driver driver) =>
+    public static DriverDetailsResponse From(Driver driver, DateOnly today) =>
         new(
             driver.Id,
             driver.DocumentNumber.Value,
@@ -35,6 +36,7 @@ public sealed record DriverDetailsResponse(
             driver.License.Category,
             driver.License.IssuedOn,
             driver.License.ExpiresOn,
+            driver.License.StatusOn(today),
             driver.Status,
             driver.CreatedAt,
             driver.UpdatedAt,

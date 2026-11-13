@@ -1,3 +1,4 @@
+using LogiTrack.Application.Common.Time;
 using LogiTrack.Application.Common.Abstractions;
 using LogiTrack.Application.Common.Pagination;
 using LogiTrack.Application.Common.Search;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LogiTrack.Application.Features.Drivers.Queries.ListDrivers;
 
-public sealed class ListDriversHandler(IApplicationDbContext db) : IQueryHandler<ListDriversQuery, PagedResult<DriverListItem>>
+public sealed class ListDriversHandler(IApplicationDbContext db, TimeProvider timeProvider) : IQueryHandler<ListDriversQuery, PagedResult<DriverListItem>>
 {
     public async ValueTask<PagedResult<DriverListItem>> Handle(ListDriversQuery query, CancellationToken cancellationToken)
     {
@@ -51,6 +52,8 @@ public sealed class ListDriversHandler(IApplicationDbContext db) : IQueryHandler
             })
             .ToListAsync(cancellationToken);
 
+        var today = ColombiaCalendar.TodayIn(timeProvider);
+
         var items = rows
             .Select(row => new DriverListItem(
                 row.Id,
@@ -59,7 +62,8 @@ public sealed class ListDriversHandler(IApplicationDbContext db) : IQueryHandler
                 row.LastName,
                 row.Status,
                 row.Category,
-                row.ExpiresOn))
+                row.ExpiresOn,
+                DriverLicense.StatusFor(row.ExpiresOn, today)))
             .ToList();
 
         return new PagedResult<DriverListItem>(items, query.Page, query.PageSize, totalCount);

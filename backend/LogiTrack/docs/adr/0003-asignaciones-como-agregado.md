@@ -67,4 +67,4 @@ Los handlers son idempotentes: si no hay asignación activa, no hacen nada.
   - La política es una excepción a una regla de arquitectura. Si aparece otra regla que combine agregados, habrá que decidir si entra en la política o si se rediseña.
   - `ETag` del camión no cambia cuando cambia su conductor. Un cliente que solo mira el camión no ve el cambio de asignación; tiene que consultar `GET /api/trucks/{id}/assignment`.
   - Los handlers de liberación se ejecutan tras guardar el cambio de estado. Si fallan, la petición responde 500 aunque el camión o el conductor ya estén guardados (ver ADR 0002). Por eso son idempotentes.
-  - La categoría mínima por tipo (`Light` → C1, `Rigid` → C2, `Articulated` → C3) está pendiente de confirmar con la normativa colombiana. El mapeo es una suposición de la fase, no un dato verificado.
+  - La categoría mínima por tipo (`Light` → C1, `Rigid` → C2, `Articulated` → C3) corresponde a vehículos de servicio público, que es el caso de la empresa. Las categorías B (servicio particular) no aplican a esta flota; si la flota incluyera vehículos particulares, habría que ampliar el enum y el mapeo.

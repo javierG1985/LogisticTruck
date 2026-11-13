@@ -9,4 +9,5 @@ public sealed record DriverListItem(
     string LastName,
     DriverStatus Status,
     LicenseCategory LicenseCategory,
-    DateOnly LicenseExpiresOn);
+    DateOnly LicenseExpiresOn,
+    LicenseStatus LicenseStatus);
