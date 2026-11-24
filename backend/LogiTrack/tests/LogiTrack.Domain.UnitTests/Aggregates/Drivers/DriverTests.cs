@@ -146,7 +146,7 @@ public sealed class DriverTests
             Now);
 
         Assert.Throws<DomainException>(() => driver.RenewLicense(
-            LicenseCategory.C2, new DateOnly(2027, 1, 15), new DateOnly(2028, 3, 15), Now));
+            LicenseCategory.C2, new DateOnly(2027, 1, 15), new DateOnly(2028, 3, 15), new DateOnly(2027, 1, 15), Now));
     }
 
     [Fact]
@@ -154,9 +154,42 @@ public sealed class DriverTests
     {
         var driver = CreateDriver();
 
-        driver.RenewLicense(LicenseCategory.C3, LicenseIssuedOn, new DateOnly(2028, 1, 15), Now);
+        driver.RenewLicense(LicenseCategory.C3, LicenseIssuedOn, new DateOnly(2028, 1, 15), LicenseIssuedOn, Now);
 
         Assert.Equal(LicenseCategory.C3, driver.License.Category);
+        Assert.Equal(new DateOnly(2028, 1, 15), driver.License.ExpiresOn);
+    }
+
+    [Fact]
+    public void RenewLicense_IssuedBeforeCurrentLicense_ThrowsDomainException()
+    {
+        var driver = CreateDriver();
+
+        var exception = Assert.Throws<DomainException>(() => driver.RenewLicense(
+            LicenseCategory.C2, LicenseIssuedOn.AddDays(-1), LicenseIssuedOn.AddYears(2), LicenseIssuedOn, Now));
+
+        Assert.Equal("La renovación no puede expedirse antes de la licencia actual.", exception.Message);
+    }
+
+    [Fact]
+    public void RenewLicense_IssuedInTheFuture_ThrowsDomainException()
+    {
+        var driver = CreateDriver();
+        var today = LicenseIssuedOn;
+
+        var exception = Assert.Throws<DomainException>(() => driver.RenewLicense(
+            LicenseCategory.C2, today.AddDays(1), today.AddYears(2), today, Now));
+
+        Assert.Equal("La licencia no puede expedirse en una fecha futura.", exception.Message);
+    }
+
+    [Fact]
+    public void RenewLicense_IssuedTheSameDayAsCurrent_IsAllowed()
+    {
+        var driver = CreateDriver();
+
+        driver.RenewLicense(LicenseCategory.C2, LicenseIssuedOn, new DateOnly(2028, 1, 15), LicenseIssuedOn, Now);
+
         Assert.Equal(new DateOnly(2028, 1, 15), driver.License.ExpiresOn);
     }
 
@@ -201,7 +234,7 @@ public sealed class DriverTests
         driver.Delete(Now);
 
         Assert.Throws<DomainException>(() => driver.RenewLicense(
-            LicenseCategory.C1, LicenseIssuedOn, new DateOnly(2028, 1, 15), Now));
+            LicenseCategory.C1, LicenseIssuedOn, new DateOnly(2028, 1, 15), LicenseIssuedOn, Now));
     }
 
     private static Driver CreateDriver() => Driver.Register(

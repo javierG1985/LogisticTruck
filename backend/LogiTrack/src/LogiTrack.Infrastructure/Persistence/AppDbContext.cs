@@ -2,8 +2,10 @@ using LogiTrack.Application.Common.Abstractions;
 using LogiTrack.Application.Common.Exceptions;
 using LogiTrack.Application.Common.Search;
 using LogiTrack.Domain.Aggregates.Assignments;
+using LogiTrack.Domain.Aggregates.Catalogs;
 using LogiTrack.Domain.Aggregates.Drivers;
 using LogiTrack.Domain.Aggregates.Trucks;
+using LogiTrack.Domain.Aggregates.Users;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -20,6 +22,14 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Driver> Drivers => Set<Driver>();
 
     public DbSet<TruckAssignment> TruckAssignments => Set<TruckAssignment>();
+
+    public DbSet<User> Users => Set<User>();
+
+    public DbSet<Role> Roles => Set<Role>();
+
+    public DbSet<RolePrivilege> RolePrivileges => Set<RolePrivilege>();
+
+    public DbSet<CatalogItem> CatalogItems => Set<CatalogItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

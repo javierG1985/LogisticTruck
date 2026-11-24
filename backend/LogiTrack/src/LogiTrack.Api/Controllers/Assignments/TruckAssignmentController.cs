@@ -4,7 +4,9 @@ using LogiTrack.Application.Features.Assignments;
 using LogiTrack.Application.Features.Assignments.Commands.AssignDriverToTruck;
 using LogiTrack.Application.Features.Assignments.Commands.ReleaseTruckAssignment;
 using LogiTrack.Application.Features.Assignments.Queries.GetCurrentTruckAssignment;
+using LogiTrack.Application.Common.Security;
 using Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogiTrack.Api.Controllers.Assignments;
@@ -17,6 +19,7 @@ namespace LogiTrack.Api.Controllers.Assignments;
 [Consumes("application/json")]
 public sealed class TruckAssignmentController(ISender sender) : ControllerBase
 {
+    [Authorize(Policy = Permissions.AssignmentsRead)]
     [HttpGet]
     [ProducesResponseType<AssignmentDetailsResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -27,6 +30,7 @@ public sealed class TruckAssignmentController(ISender sender) : ControllerBase
     }
 
     [HttpPut]
+    [Authorize(Policy = Permissions.AssignmentsWrite)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -46,6 +50,7 @@ public sealed class TruckAssignmentController(ISender sender) : ControllerBase
     }
 
     [HttpDelete]
+    [Authorize(Policy = Permissions.AssignmentsWrite)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]

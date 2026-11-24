@@ -15,5 +15,9 @@ public sealed class CreateDriverValidator : DriverProfileValidator<CreateDriverC
             .WithMessage("La cédula es obligatoria.")
             .Must(documentNumber => DocumentNumber.TryCreate(documentNumber, out _))
             .WithMessage("La cédula debe tener entre 6 y 10 dígitos, sin puntos ni letras.");
+
+        RuleFor(command => command.LicenseCategory)
+            .IsInEnum()
+            .WithMessage("La categoría de licencia no es válida.");
     }
 }

@@ -49,7 +49,7 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | Dado de baja (conductor) | `Driver.DeletedAt` distinto de nulo | Borrado lógico. Un conductor dado de baja no se modifica. |
 | Registrar conductor | `Driver.Register(...)` | Crea el agregado, con licencia inicial, y registra `DriverRegistered`. |
 | Cambio de estado (conductor) | `Driver.ChangeStatus(...)` | Registra `DriverStatusChanged` con el estado anterior y el nuevo. |
-| Renovar licencia | `Driver.RenewLicense(...)` | Reemplaza la licencia por una nueva validada con la fecha de nacimiento del conductor. |
+| Renovar licencia | `Driver.RenewLicense(...)`, endpoint `PUT /api/drivers/{id}/license` | Sustituye la licencia por una expedida después de la actual y no en el futuro. Se valida con la fecha de nacimiento. El `PUT` de contacto no cambia la licencia. |
 
 ## Área Fleet: asignaciones
 
@@ -62,6 +62,34 @@ Lenguaje ubicuo del sistema: cada término de negocio tiene un nombre en el cód
 | Motivo de liberación | `AssignmentReleaseReason` | `Manual`, `TruckStatusChanged`, `TruckDeleted`, `DriverStatusChanged`, `DriverDeleted`. |
 | Política de asignación | `TruckAssignmentPolicy.EnsureCanAssign(truck, driver, today)` | Regla que combina camión y conductor: camión disponible, conductor activo, licencia vigente y categoría suficiente. Es la única excepción a la regla de no referenciar agregados entre sí. |
 | Categoría mínima por tipo | `TruckAssignmentPolicy.RequiredLicenseFor(TruckType)` | `Light` → C1, `Rigid` → C2, `Articulated` → C3. Vehículos de servicio público de la empresa: C1 automóviles, camperos, camionetas y microbuses; C2 camiones rígidos, busetas y buses; C3 articulados. |
+
+## Seguridad y usuarios
+
+| Término de negocio | Nombre en el código | Notas |
+| --- | --- | --- |
+| Usuario | `User` | Agregado de la feature `Users`, en el esquema `security`. Correo único y normalizado en minúsculas. Ver ADR 0004. |
+| Rol | `Role` (tabla `security.roles`) | Catálogo en base de datos: `Administrator` (Administrador), `Operator` (Operador) y `Driver` (Conductor). Su código es el que guarda el usuario y viaja en el token. |
+| Permiso | `Privilege` (tabla `security.permissions`); códigos en `Permissions` | Acción concreta, por ejemplo `trucks.write` o `users.manage`. Las políticas de la API comprueban permisos, no roles. |
+| Permiso de rol | `RolePrivilege` (tabla `security.role_permissions`) | Qué permisos tiene cada rol. Los permisos del conductor se ajustan aquí. |
+| Inicio de sesión | `POST /api/auth/login` → `LoginCommand` | Deja el token en la cookie `lt_session` (HttpOnly) y devuelve `email`, `role` y `expiresIn`, sin el token. Error genérico ante correo o contraseña incorrectos. |
+| Cierre de sesión | `POST /api/auth/logout` | Borra la cookie `lt_session`. |
+| Token de acceso | `ITokenIssuer` / `JwtTokenIssuer` | JWT firmado con HS256, de 60 minutos. Claims: `sub`, `email`, `role`, `jti`. Viaja solo en la cookie HttpOnly. |
+| Hash de contraseña | `IPasswordHasher` / `Pbkdf2PasswordHasher` | PBKDF2-SHA256 con 600 000 iteraciones. |
+| Política por permiso | `[Authorize(Policy = Permissions.TrucksWrite)]` | Un claim `permission` en el token por cada permiso del rol. Hay una política por código de permiso. |
+| Administrador inicial | `AdminBootstrapper` (`--bootstrap-admin`) | Crea el primer administrador desde variables de entorno. Idempotente. |
+
+## Catálogos de parametrización (para el frontend)
+
+Solo lectura: `GET /api/catalogs` devuelve todos, agrupados por nombre (`{ "catalogs": { "truck_types": [{ "code": "Light", "label": "Liviano" }] } }`). Tabla `fleet.catalog_items`. Los códigos son los nombres de los enums del dominio; una prueba comprueba que coincidan. Cambiar un enum exige cambiar también su catálogo.
+
+| Catálogo | Enum | Valores |
+| --- | --- | --- |
+| `truck_types` | `TruckType` | Light, Rigid, Articulated |
+| `truck_statuses` | `TruckStatus` | Available, InRoute, Maintenance, Inactive |
+| `driver_statuses` | `DriverStatus` | Active, OnLeave, Inactive |
+| `license_categories` | `LicenseCategory` | C1, C2, C3 |
+| `license_statuses` | `LicenseStatus` | Valid, ExpiringSoon, Expired |
+| `assignment_release_reasons` | `AssignmentReleaseReason` | Manual, TruckStatusChanged, TruckDeleted, DriverStatusChanged, DriverDeleted |
 
 ## Eventos de dominio
 

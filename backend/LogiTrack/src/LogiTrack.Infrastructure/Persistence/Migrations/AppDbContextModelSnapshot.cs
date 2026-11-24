@@ -76,6 +76,183 @@ namespace LogiTrack.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Catalogs.CatalogItem", b =>
+                {
+                    b.Property<string>("CatalogCode")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("catalog_code");
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("label");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("CatalogCode", "Code")
+                        .HasName("pk_catalog_items");
+
+                    b.ToTable("catalog_items", "fleet");
+
+                    b.HasData(
+                        new
+                        {
+                            CatalogCode = "truck_types",
+                            Code = "Light",
+                            Label = "Liviano",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            CatalogCode = "truck_types",
+                            Code = "Rigid",
+                            Label = "Rígido",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            CatalogCode = "truck_types",
+                            Code = "Articulated",
+                            Label = "Articulado",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            CatalogCode = "truck_statuses",
+                            Code = "Available",
+                            Label = "Disponible",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            CatalogCode = "truck_statuses",
+                            Code = "InRoute",
+                            Label = "En ruta",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            CatalogCode = "truck_statuses",
+                            Code = "Maintenance",
+                            Label = "En mantenimiento",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            CatalogCode = "truck_statuses",
+                            Code = "Inactive",
+                            Label = "Inactivo",
+                            SortOrder = 4
+                        },
+                        new
+                        {
+                            CatalogCode = "driver_statuses",
+                            Code = "Active",
+                            Label = "Activo",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            CatalogCode = "driver_statuses",
+                            Code = "OnLeave",
+                            Label = "Vacaciones o incapacidad",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            CatalogCode = "driver_statuses",
+                            Code = "Inactive",
+                            Label = "Retirado",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            CatalogCode = "license_categories",
+                            Code = "C1",
+                            Label = "C1",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            CatalogCode = "license_categories",
+                            Code = "C2",
+                            Label = "C2",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            CatalogCode = "license_categories",
+                            Code = "C3",
+                            Label = "C3",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            CatalogCode = "license_statuses",
+                            Code = "Valid",
+                            Label = "Vigente",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            CatalogCode = "license_statuses",
+                            Code = "ExpiringSoon",
+                            Label = "Por vencer",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            CatalogCode = "license_statuses",
+                            Code = "Expired",
+                            Label = "Vencida",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            CatalogCode = "assignment_release_reasons",
+                            Code = "Manual",
+                            Label = "Liberación manual",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            CatalogCode = "assignment_release_reasons",
+                            Code = "TruckStatusChanged",
+                            Label = "Cambio de estado del camión",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            CatalogCode = "assignment_release_reasons",
+                            Code = "TruckDeleted",
+                            Label = "Camión dado de baja",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            CatalogCode = "assignment_release_reasons",
+                            Code = "DriverStatusChanged",
+                            Label = "Cambio de estado del conductor",
+                            SortOrder = 4
+                        },
+                        new
+                        {
+                            CatalogCode = "assignment_release_reasons",
+                            Code = "DriverDeleted",
+                            Label = "Conductor dado de baja",
+                            SortOrder = 5
+                        });
+                });
+
             modelBuilder.Entity("LogiTrack.Domain.Aggregates.Drivers.Driver", b =>
                 {
                     b.Property<Guid>("Id")
@@ -246,6 +423,250 @@ namespace LogiTrack.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Users.Privilege", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("description");
+
+                    b.HasKey("Code")
+                        .HasName("pk_permissions");
+
+                    b.ToTable("permissions", "security");
+
+                    b.HasData(
+                        new
+                        {
+                            Code = "trucks.read",
+                            Description = "Consultar camiones"
+                        },
+                        new
+                        {
+                            Code = "trucks.write",
+                            Description = "Registrar, editar, cambiar estado y dar de baja camiones"
+                        },
+                        new
+                        {
+                            Code = "drivers.read",
+                            Description = "Consultar conductores"
+                        },
+                        new
+                        {
+                            Code = "drivers.write",
+                            Description = "Registrar, editar, renovar licencia, cambiar estado y dar de baja conductores"
+                        },
+                        new
+                        {
+                            Code = "assignments.read",
+                            Description = "Consultar asignaciones"
+                        },
+                        new
+                        {
+                            Code = "assignments.write",
+                            Description = "Asignar y liberar conductores de camiones"
+                        },
+                        new
+                        {
+                            Code = "users.manage",
+                            Description = "Crear usuarios"
+                        });
+                });
+
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Users.Role", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Code")
+                        .HasName("pk_roles");
+
+                    b.ToTable("roles", "security");
+
+                    b.HasData(
+                        new
+                        {
+                            Code = "Administrator",
+                            Name = "Administrador"
+                        },
+                        new
+                        {
+                            Code = "Operator",
+                            Name = "Operador"
+                        },
+                        new
+                        {
+                            Code = "Driver",
+                            Name = "Conductor"
+                        });
+                });
+
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Users.RolePrivilege", b =>
+                {
+                    b.Property<string>("RoleCode")
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("role_code");
+
+                    b.Property<string>("PermissionCode")
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("permission_code");
+
+                    b.HasKey("RoleCode", "PermissionCode")
+                        .HasName("pk_role_permissions");
+
+                    b.HasIndex("PermissionCode")
+                        .HasDatabaseName("ix_role_permissions_permission_code");
+
+                    b.ToTable("role_permissions", "security");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleCode = "Administrator",
+                            PermissionCode = "trucks.read"
+                        },
+                        new
+                        {
+                            RoleCode = "Administrator",
+                            PermissionCode = "trucks.write"
+                        },
+                        new
+                        {
+                            RoleCode = "Administrator",
+                            PermissionCode = "drivers.read"
+                        },
+                        new
+                        {
+                            RoleCode = "Administrator",
+                            PermissionCode = "drivers.write"
+                        },
+                        new
+                        {
+                            RoleCode = "Administrator",
+                            PermissionCode = "assignments.read"
+                        },
+                        new
+                        {
+                            RoleCode = "Administrator",
+                            PermissionCode = "assignments.write"
+                        },
+                        new
+                        {
+                            RoleCode = "Administrator",
+                            PermissionCode = "users.manage"
+                        },
+                        new
+                        {
+                            RoleCode = "Operator",
+                            PermissionCode = "trucks.read"
+                        },
+                        new
+                        {
+                            RoleCode = "Operator",
+                            PermissionCode = "trucks.write"
+                        },
+                        new
+                        {
+                            RoleCode = "Operator",
+                            PermissionCode = "drivers.read"
+                        },
+                        new
+                        {
+                            RoleCode = "Operator",
+                            PermissionCode = "drivers.write"
+                        },
+                        new
+                        {
+                            RoleCode = "Operator",
+                            PermissionCode = "assignments.read"
+                        },
+                        new
+                        {
+                            RoleCode = "Operator",
+                            PermissionCode = "assignments.write"
+                        },
+                        new
+                        {
+                            RoleCode = "Driver",
+                            PermissionCode = "trucks.read"
+                        },
+                        new
+                        {
+                            RoleCode = "Driver",
+                            PermissionCode = "drivers.read"
+                        },
+                        new
+                        {
+                            RoleCode = "Driver",
+                            PermissionCode = "assignments.read"
+                        });
+                });
+
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Users.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("password_hash");
+
+                    b.Property<string>("RoleCode")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("role_code");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_users");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_email");
+
+                    b.HasIndex("RoleCode")
+                        .HasDatabaseName("ix_users_role_code");
+
+                    b.ToTable("users", "security", t =>
+                        {
+                            t.HasCheckConstraint("ck_users_email_lowercase", "email = lower(email)");
+                        });
+                });
+
             modelBuilder.Entity("LogiTrack.Domain.Aggregates.Assignments.TruckAssignment", b =>
                 {
                     b.HasOne("LogiTrack.Domain.Aggregates.Drivers.Driver", null)
@@ -296,6 +717,33 @@ namespace LogiTrack.Infrastructure.Persistence.Migrations
 
                     b.Navigation("License")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Users.RolePrivilege", b =>
+                {
+                    b.HasOne("LogiTrack.Domain.Aggregates.Users.Privilege", null)
+                        .WithMany()
+                        .HasForeignKey("PermissionCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_role_permissions_permissions_permission_code");
+
+                    b.HasOne("LogiTrack.Domain.Aggregates.Users.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_role_permissions_roles_role_code");
+                });
+
+            modelBuilder.Entity("LogiTrack.Domain.Aggregates.Users.User", b =>
+                {
+                    b.HasOne("LogiTrack.Domain.Aggregates.Users.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_users_roles_role_code");
                 });
 #pragma warning restore 612, 618
         }

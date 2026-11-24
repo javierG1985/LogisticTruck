@@ -136,8 +136,5 @@ public sealed class DriverCommandValidatorsTests
         "Calle 10 # 20-30",
         "3001234567",
         "ana@example.com",
-        null,
-        LicenseCategory.C2,
-        LicenseIssuedOn,
-        LicenseExpiresOn);
+        null);
 }

@@ -9,7 +9,6 @@ public sealed class UpdateDriverHandler(IApplicationDbContext db, TimeProvider t
     public async ValueTask<uint> Handle(UpdateDriverCommand command, CancellationToken cancellationToken)
     {
         var driver = await DriverLookup.LoadForChangeAsync(db, command.Id, command.ExpectedVersion, cancellationToken);
-        var utcNow = timeProvider.GetUtcNow().UtcDateTime;
 
         driver.Update(
             command.FirstName,
@@ -17,10 +16,8 @@ public sealed class UpdateDriverHandler(IApplicationDbContext db, TimeProvider t
             command.Address,
             command.Phone,
             command.Email,
-            utcNow,
+            timeProvider.GetUtcNow().UtcDateTime,
             command.ProfilePhotoUrl);
-
-        driver.RenewLicense(command.LicenseCategory, command.LicenseIssuedOn, command.LicenseExpiresOn, utcNow);
 
         await db.SaveChangesAsync(cancellationToken);
 

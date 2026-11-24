@@ -44,8 +44,5 @@ public abstract class DriverProfileValidator<TCommand> : AbstractValidator<TComm
             .MaximumLength(500)
             .WithMessage("La referencia a la foto no puede superar 500 caracteres.");
 
-        RuleFor(command => command.LicenseCategory)
-            .IsInEnum()
-            .WithMessage("La categoría de licencia no es válida.");
     }
 }

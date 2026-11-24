@@ -1,7 +1,9 @@
 using EFCore.NamingConventions;
 using LogiTrack.Application.Common.Abstractions;
+using LogiTrack.Application.Common.Security;
 using LogiTrack.Infrastructure.Persistence;
 using LogiTrack.Infrastructure.Persistence.Interceptors;
+using LogiTrack.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +25,8 @@ public static class DependencyInjection
             .AddInterceptors(provider.GetRequiredService<DispatchDomainEventsInterceptor>()));
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+
+        services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 
         services.AddHealthChecks().AddNpgSql(connectionString, name: "postgres");
 

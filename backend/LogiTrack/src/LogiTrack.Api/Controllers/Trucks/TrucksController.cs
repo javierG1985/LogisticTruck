@@ -8,7 +8,9 @@ using LogiTrack.Application.Features.Trucks.Commands.DeleteTruck;
 using LogiTrack.Application.Features.Trucks.Queries.GetTruckById;
 using LogiTrack.Application.Features.Trucks.Queries.ListTrucks;
 using LogiTrack.Application.Features.Trucks.Commands.UpdateTruck;
+using LogiTrack.Application.Common.Security;
 using Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogiTrack.Api.Controllers.Trucks;
@@ -20,6 +22,7 @@ namespace LogiTrack.Api.Controllers.Trucks;
 [Consumes("application/json")]
 public sealed class TrucksController(ISender sender) : ControllerBase
 {
+    [Authorize(Policy = Permissions.TrucksRead)]
     [HttpGet]
     [ProducesResponseType<PagedResult<TruckListItem>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -31,6 +34,7 @@ public sealed class TrucksController(ISender sender) : ControllerBase
         return Ok(trucks);
     }
 
+    [Authorize(Policy = Permissions.TrucksRead)]
     [HttpGet("{id:guid}")]
     [ProducesResponseType<TruckDetailsResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -42,6 +46,7 @@ public sealed class TrucksController(ISender sender) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = Permissions.TrucksWrite)]
     [ProducesResponseType<TruckDetailsResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -53,6 +58,7 @@ public sealed class TrucksController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Policy = Permissions.TrucksWrite)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -80,6 +86,7 @@ public sealed class TrucksController(ISender sender) : ControllerBase
     }
 
     [HttpPatch("{id:guid}/status")]
+    [Authorize(Policy = Permissions.TrucksWrite)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -99,6 +106,7 @@ public sealed class TrucksController(ISender sender) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = Permissions.TrucksWrite)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status412PreconditionFailed)]

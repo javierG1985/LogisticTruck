@@ -91,10 +91,21 @@ public sealed class Driver : AggregateRoot
         UpdatedAt = utcNow;
     }
 
-    // La licencia se valida contra la fecha de nacimiento que ya tiene el conductor.
-    public void RenewLicense(LicenseCategory category, DateOnly issuedOn, DateOnly expiresOn, DateTime utcNow)
+    // Renovar es sustituir la licencia por una expedida después de la actual y no en el futuro.
+    // La nueva licencia se valida contra la fecha de nacimiento que ya tiene el conductor.
+    public void RenewLicense(LicenseCategory category, DateOnly issuedOn, DateOnly expiresOn, DateOnly today, DateTime utcNow)
     {
         EnsureNotDeleted();
+
+        if (issuedOn > today)
+        {
+            throw new DomainException("La licencia no puede expedirse en una fecha futura.");
+        }
+
+        if (issuedOn < License.IssuedOn)
+        {
+            throw new DomainException("La renovación no puede expedirse antes de la licencia actual.");
+        }
 
         License = DriverLicense.Create(category, issuedOn, expiresOn, BirthDate);
         UpdatedAt = utcNow;

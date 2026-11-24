@@ -1,7 +1,9 @@
 using LogiTrack.Application.Common.Pagination;
 using LogiTrack.Application.Features.Assignments;
 using LogiTrack.Application.Features.Assignments.Queries.ListAssignments;
+using LogiTrack.Application.Common.Security;
 using Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogiTrack.Api.Controllers.Assignments;
@@ -13,6 +15,7 @@ namespace LogiTrack.Api.Controllers.Assignments;
 [Consumes("application/json")]
 public sealed class AssignmentsController(ISender sender) : ControllerBase
 {
+    [Authorize(Policy = Permissions.AssignmentsRead)]
     [HttpGet]
     [ProducesResponseType<PagedResult<AssignmentDetailsResponse>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

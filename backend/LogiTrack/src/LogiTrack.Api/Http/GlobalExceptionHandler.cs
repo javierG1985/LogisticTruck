@@ -18,6 +18,7 @@ public sealed partial class GlobalExceptionHandler(
         var problem = exception switch
         {
             ValidationException validation => CreateValidationProblem(validation),
+            UnauthenticatedException unauthenticated => CreateProblem(StatusCodes.Status401Unauthorized, "No autenticado", unauthenticated.Message),
             NotFoundException notFound => CreateProblem(StatusCodes.Status404NotFound, "Recurso no encontrado", notFound.Message),
             ConflictException conflict => CreateProblem(StatusCodes.Status409Conflict, "Conflicto", conflict.Message),
             DomainException domain => CreateProblem(StatusCodes.Status409Conflict, "Regla de negocio incumplida", domain.Message),
@@ -78,6 +79,7 @@ public sealed partial class GlobalExceptionHandler(
     private static string TypeFor(int status) => status switch
     {
         StatusCodes.Status400BadRequest => "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.1",
+        StatusCodes.Status401Unauthorized => "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.2",
         StatusCodes.Status404NotFound => "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.5",
         StatusCodes.Status409Conflict => "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.10",
         StatusCodes.Status412PreconditionFailed => "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.13",

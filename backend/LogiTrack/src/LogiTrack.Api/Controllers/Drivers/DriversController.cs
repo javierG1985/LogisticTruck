@@ -5,10 +5,13 @@ using LogiTrack.Application.Features.Drivers;
 using LogiTrack.Application.Features.Drivers.Commands.ChangeDriverStatus;
 using LogiTrack.Application.Features.Drivers.Commands.CreateDriver;
 using LogiTrack.Application.Features.Drivers.Commands.DeleteDriver;
+using LogiTrack.Application.Features.Drivers.Commands.RenewDriverLicense;
 using LogiTrack.Application.Features.Drivers.Commands.UpdateDriver;
 using LogiTrack.Application.Features.Drivers.Queries.GetDriverById;
 using LogiTrack.Application.Features.Drivers.Queries.ListDrivers;
+using LogiTrack.Application.Common.Security;
 using Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogiTrack.Api.Controllers.Drivers;
@@ -20,6 +23,7 @@ namespace LogiTrack.Api.Controllers.Drivers;
 [Consumes("application/json")]
 public sealed class DriversController(ISender sender) : ControllerBase
 {
+    [Authorize(Policy = Permissions.DriversRead)]
     [HttpGet]
     [ProducesResponseType<PagedResult<DriverListItem>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -31,6 +35,7 @@ public sealed class DriversController(ISender sender) : ControllerBase
         return Ok(drivers);
     }
 
+    [Authorize(Policy = Permissions.DriversRead)]
     [HttpGet("{id:guid}")]
     [ProducesResponseType<DriverDetailsResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -42,6 +47,7 @@ public sealed class DriversController(ISender sender) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = Permissions.DriversWrite)]
     [ProducesResponseType<DriverDetailsResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -53,6 +59,7 @@ public sealed class DriversController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Policy = Permissions.DriversWrite)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -71,17 +78,35 @@ public sealed class DriversController(ISender sender) : ControllerBase
             request.Address,
             request.Phone,
             request.Email,
-            request.ProfilePhotoUrl,
-            request.LicenseCategory,
-            request.LicenseIssuedOn,
-            request.LicenseExpiresOn);
+            request.ProfilePhotoUrl);
 
         var version = await sender.Send(command, cancellationToken);
         Response.Headers.ETag = ETag.FromVersion(version);
         return NoContent();
     }
 
+    [HttpPut("{id:guid}/license")]
+    [Authorize(Policy = Permissions.DriversWrite)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status412PreconditionFailed)]
+    [ProducesResponseType(StatusCodes.Status428PreconditionRequired)]
+    public async Task<ActionResult> RenewLicense(Guid id, RenewDriverLicenseRequest request, CancellationToken cancellationToken)
+    {
+        var expectedVersion = ETag.RequireIfMatch(Request);
+
+        var version = await sender.Send(
+            new RenewDriverLicenseCommand(id, expectedVersion, request.LicenseCategory, request.LicenseIssuedOn, request.LicenseExpiresOn),
+            cancellationToken);
+
+        Response.Headers.ETag = ETag.FromVersion(version);
+        return NoContent();
+    }
+
     [HttpPatch("{id:guid}/status")]
+    [Authorize(Policy = Permissions.DriversWrite)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -101,6 +126,7 @@ public sealed class DriversController(ISender sender) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = Permissions.DriversWrite)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status412PreconditionFailed)]

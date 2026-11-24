@@ -1,11 +1,10 @@
 using LogiTrack.Application.Features.Drivers;
-using LogiTrack.Domain.Aggregates.Drivers;
 using Mediator;
 
 namespace LogiTrack.Application.Features.Drivers.Commands.UpdateDriver;
 
-// Campos editables (la cédula y la fecha de nacimiento no cambian) más el id de la ruta y la versión de If-Match.
-// La licencia se renueva con sus fechas nuevas. Devuelve la nueva versión para el ETag de la respuesta.
+// Datos de contacto (la cédula, la fecha de nacimiento y la licencia no cambian aquí) más el id de la ruta y la versión de If-Match.
+// Devuelve la nueva versión para el ETag de la respuesta.
 public sealed record UpdateDriverCommand(
     Guid Id,
     uint ExpectedVersion,
@@ -14,7 +13,4 @@ public sealed record UpdateDriverCommand(
     string Address,
     string Phone,
     string Email,
-    string? ProfilePhotoUrl,
-    LicenseCategory LicenseCategory,
-    DateOnly LicenseIssuedOn,
-    DateOnly LicenseExpiresOn) : ICommand<uint>, IDriverProfile;
+    string? ProfilePhotoUrl) : ICommand<uint>, IDriverProfile;

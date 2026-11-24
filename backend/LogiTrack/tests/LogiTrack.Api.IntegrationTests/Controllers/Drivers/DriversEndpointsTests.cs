@@ -268,8 +268,5 @@ public sealed class DriversEndpointsTests(ApiFactory factory) : IClassFixture<Ap
         phone = "3109876543",
         email = "ana.nueva@example.com",
         profilePhotoUrl = (string?)null,
-        licenseCategory = "C3",
-        licenseIssuedOn = "2026-01-15",
-        licenseExpiresOn = "2029-01-15",
     };
 }
